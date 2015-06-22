@@ -45,6 +45,7 @@ enum MACHINE_CMD
 };
 
 int count;
+int rtCycleCounter;
 
 // Message loop daemon
 void* MessageLoopDaemon(void *)
@@ -65,6 +66,16 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
 {
     int CommandID;
 
+    rtCycleCounter++;
+    if ( rtCycleCounter % 20 == 0)
+    {
+        rt_printf("Force:  ");
+        for (int i = 0; i < 6; i++)
+        {
+            rt_printf("%8.3lf  ", machineData.forceData[0].forceValues[i] / 1000.0);
+        }
+        rt_printf("\n");
+    }
     CommandID=msg.GetMsgID();
     switch(CommandID)
     {
