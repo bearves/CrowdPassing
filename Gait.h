@@ -8,6 +8,7 @@
 #define GAIT_H_
 #include "Aris_Control.h"
 #include "Aris_ControlData.h"
+#include "PushRecoveryPlanner.h"
 
 #include <string>
 using namespace std;
@@ -98,16 +99,19 @@ class CGait
         ~CGait();
         //read txt to array
         static int InitGait(Aris::RT_CONTROL::CSysInitParameters& param);
-        static int RunGait(EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data);
+        static int RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data);
         static bool IsGaitFinished();
         static bool IsHomeStarted[AXIS_NUMBER];
         static bool IsConsFinished[AXIS_NUMBER];
         static int Gait_iter[AXIS_NUMBER];
         static int Gait_iter_count[AXIS_NUMBER];
         static EGaitState m_gaitState[AXIS_NUMBER];
+        static PushRecoveryPlanner onlinePlanner;
 
     private:
         static EGAIT m_currentGait[AXIS_NUMBER];
+        static double m_screwLength[AXIS_NUMBER];
+        static int m_commandMotorCounts[AXIS_NUMBER];
         static long long int m_gaitStartTime[AXIS_NUMBER];
         static int m_gaitCurrentIndex[AXIS_NUMBER];
         static Aris::RT_CONTROL::CMotorData m_standStillData[AXIS_NUMBER];
@@ -115,6 +119,7 @@ class CGait
         static Aris::RT_CONTROL::CMotorData m_feedbackDataMapped[AXIS_NUMBER];
         static void MapFeedbackDataIn(Aris::RT_CONTROL::CMachineData& p_data );
         static void MapCommandDataOut(Aris::RT_CONTROL::CMachineData& p_data );
+        static void CalculateActualMotorCounts( double screwLength [], int motorCounts []);
 };
 
 }

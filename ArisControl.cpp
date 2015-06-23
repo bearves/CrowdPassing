@@ -23,6 +23,7 @@ static EGAIT gaitcmdtemp[AXIS_NUMBER];
 Aris::RT_CONTROL::ACTUATION controlSystem;
 Aris::RT_CONTROL::CSysInitParameters initParam;
 
+
 enum MACHINE_CMD
 {
     NOCMD         = 1000,
@@ -41,11 +42,13 @@ enum MACHINE_CMD
     LEGUP         = 1013,
     TURNLEFT      = 1014,
     TURNRIGHT     = 1015,
-    ONLINEGAIT    = 1016
+    ONLINEGAIT    = 1016,
+    ONLINEBEGIN   = 1017,
+    ONLINEEND     = 1018
 };
 
 int count;
-int rtCycleCounter;
+int rtCycleCounter = 0;
 
 // Message loop daemon
 void* MessageLoopDaemon(void *)
@@ -67,28 +70,24 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
     int CommandID;
 
     rtCycleCounter++;
-    if ( rtCycleCounter % 20 == 0)
-    {
-        rt_printf("Force:  ");
-        for (int i = 0; i < 6; i++)
-        {
-            rt_printf("%8.3lf  ", machineData.forceData[0].forceValues[i] / 1000.0);
-        }
-        rt_printf("\n");
-    }
+
+    double timeNow = rtCycleCounter * 0.001;
+
     CommandID=msg.GetMsgID();
     switch(CommandID)
     {
+        case Aris::RT_CONTROL::RT_MSG::INVALID_MSG_ID:
+            break;
         case NOCMD:
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_NONE;
             }
             rt_printf("NONE Command Get in NRT\n" );
-
             break;
 
         case ENABLE:
+            gait.onlinePlanner.Offline();
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_ENABLE;
@@ -97,6 +96,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
 
             break;
         case POWEROFF:
+            gait.onlinePlanner.Offline();
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_POWEROFF;
@@ -105,6 +105,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
 
             break;
         case STOP:
+            gait.onlinePlanner.Offline();
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_STOP;
@@ -113,6 +114,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
 
             break;
         case RUNNING:
+            gait.onlinePlanner.Offline();
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_RUNNING;
@@ -194,9 +196,6 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                 rt_printf("HOME2START_1 Command Get in NRT\n" );
 
             }
-
-
-
             break;
 
         case HOME2START_2:
@@ -220,7 +219,6 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
 
                 rt_printf("HOME2START_2 Command Get in NRT\n" );
             }
-
             break;
 
         case FORWARD:
@@ -242,10 +240,6 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                 }
 
             }
-
-            // rt_printf("driver 0 gaitcmd:%d\n",gaitcmd[0]);
-
-
             break;
         case BACKWARD:
             for(int i=0;i<18;i++)
@@ -266,10 +260,6 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                 }
 
             }
-
-            // rt_printf("driver 0 gaitcmd:%d\n",gaitcmd[0]);
-
-
             break;
 
         case FAST_FORWARD:
@@ -291,11 +281,8 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                 }
 
             }
-
-            // rt_printf("driver 0 gaitcmd:%d\n",gaitcmd[0]);
-
-
             break;
+
         case FAST_BACKWARD:
             for(int i=0;i<18;i++)
             {
@@ -315,11 +302,9 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                 }
 
             }
-
-
             break;
-        case LEGUP:
 
+        case LEGUP:
             if(gait.m_gaitState[MapAbsToPhy[0]]==GAIT_STOP)
             {
                 for(int i=0;i<18;i++)
@@ -331,8 +316,8 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                 }
             }
             break;
-        case TURNLEFT:
 
+        case TURNLEFT:
             if(gait.m_gaitState[MapAbsToPhy[0]]==GAIT_STOP)
             {
                 for(int i=0;i<18;i++)
@@ -344,8 +329,8 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                 }
             }
             break;
-        case TURNRIGHT:
 
+        case TURNRIGHT:
             if(gait.m_gaitState[MapAbsToPhy[0]]==GAIT_STOP)
             {
                 for(int i=0;i<18;i++)
@@ -353,13 +338,14 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
                     machineData.motorsModes[i]=EOperationMode::OM_CYCLICVEL;
                     gaitcmd[MapAbsToPhy[i]]=EGAIT::GAIT_TURN_RIGHT;
                     machineData.motorsCommands[i]=EMCMD_RUNNING;
-
                 }
             }
             break;
+
         case ONLINEGAIT:
             // TODO: add online trj code here
-            
+
+            gait.onlinePlanner.Initialize();
             if(gait.m_gaitState[MapAbsToPhy[0]]==GAIT_STOP)
             {
                 for(int i=0;i<18;i++)
@@ -371,14 +357,20 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
             }
             break;
 
+        case ONLINEBEGIN:
+            gait.onlinePlanner.Start(timeNow);
+            break;
+
+        case ONLINEEND:
+            gait.onlinePlanner.Stop(timeNow);
+            break;
+
         default:
             //DO NOTHING, CMD AND TRAJ WILL KEEP STILL
             break;
     }
-    // gait.IfReadytoSetGait(machineData.isMotorHomed[0]);
-    // rt_printf("driver 0 gaitcmd:%d\n",gaitcmd[0]);
 
-    gait.RunGait(gaitcmd,machineData);
+    gait.RunGait(timeNow, gaitcmd,machineData);
 
     return 0;
 
@@ -468,12 +460,17 @@ int OnGetControlCommand(Aris::Core::MSG &msg)
             data.SetMsgID(ONLINEGAIT);
             controlSystem.NRT_PostMsg(data);
             break;
-
-
+        case 17:
+            data.SetMsgID(ONLINEBEGIN);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 18:
+            data.SetMsgID(ONLINEEND);
+            controlSystem.NRT_PostMsg(data);
+            break;
         default:
             printf("Hi! I didn't get validate cmd\n");
             break;
-
     }
     return CommandID;
 
@@ -504,7 +501,7 @@ int main(int argc, char** argv)
     controlSystem.SetTrajectoryGenerator(tg);
 
     //controlSystem.SetModeCycVel();
-    
+
     initParam.motorNum=18;
     initParam.homeHighSpeed=280000;
     initParam.homeLowSpeed=40000;

@@ -5,6 +5,29 @@
 
 class VirtualBipedPlanner
 {
+public:
+
+    static const int STEP_TO_COMPLETELY_STOP = 8;
+
+    enum VIRTUAL_GAIT_STATE
+    {
+        VGS_READY    = 1,
+        VGS_STARTED  = 2,
+        VGS_STOPPING = 3,
+        VGS_STOPPED  = 4
+    };
+
+    VirtualBipedPlanner();
+    ~VirtualBipedPlanner();
+
+    int Initialize();
+    int Start(double timeNow);
+    int RequireStop(double timeNow);
+    // One dimensional at this time
+    int DoIteration(/*IN*/double timeNow, /*IN*/double * fext, /*OUT*/double *pgrp, /*OUT*/double *pgrpdot);
+    
+    VIRTUAL_GAIT_STATE GetState() const { return gaitState;};
+
 private:
     // State variables
     double yddot;
@@ -29,6 +52,7 @@ private:
     double timeRatio;
     int stepCount;
     double startTime;
+    double requireStopTime;
     double lastTransitionTime;
 
     // output variables
@@ -60,19 +84,15 @@ private:
     double vellimit;
     double poslimit;
 
+    int stepLeft;
+
+    VIRTUAL_GAIT_STATE gaitState;
+
     double Saturate(double ainput, double limit);
     int GetSwingFootTarget();
     int StateTransition();
     int PlanningFootHeight();
     int AssignStateToCorrespondFoot();
-public:
-    VirtualBipedPlanner();
-    ~VirtualBipedPlanner();
-
-    int Initialize();
-    int Start(double timeNow);
-    // One dimensional at this time
-    int DoIteration(/*IN*/double timeNow, /*IN*/double * fext, /*OUT*/double *pgrp, /*OUT*/double *pgrpdot);
 };
 
 #endif

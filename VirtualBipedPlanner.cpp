@@ -53,13 +53,31 @@ int VirtualBipedPlanner::Initialize()
     stepCount = 0;
     startTime = 0;
     lastTransitionTime = 0;
+
+    gaitState = VGS_READY;
+
     return 0;
 }
 
 int VirtualBipedPlanner::Start( double timeNow )
 {
-    Initialize();
-    startTime = timeNow;
+    if ( gaitState == VGS_READY )
+    {
+        startTime = timeNow;
+        lastTransitionTime = startTime;
+        gaitState = VGS_STARTED;
+    }
+    return 0;
+}
+
+int VirtualBipedPlanner::RequireStop( double timeNow )
+{
+    if ( gaitState == VGS_STARTED )
+    {
+        requireStopTime = timeNow;
+        stepLeft = STEP_TO_COMPLETELY_STOP;
+        gaitState = VGS_STOPPING;
+    }
     return 0;
 }
 
@@ -70,42 +88,67 @@ int VirtualBipedPlanner::DoIteration(
     /*OUT*/double *pgrpdot )
 {
     bool isaStepComplete = false;
-    timeRatio = (timeNow - lastTransitionTime) / halfperiod;
-    if(timeRatio > 1)
+
+    // automatically switch to STOPPED state
+    if ( gaitState == VGS_STOPPING)
     {
-        timeRatio -= 1;
-        lastTransitionTime = timeNow;
-        isaStepComplete = true;
+        fext[0] = 0;
     }
 
-    // Discrete equation of spring-damped linear inverted pendulum
-    yddot = (-damp * lastydot 
-              - kspr * lasty
-              + alpha * mass * gravity / height * lasty
-              + fext[0]) / mass;
-    yddot = Saturate(yddot, acclimitStance);
-
-    thisydot = lastydot + th * yddot;
-    thisy    = lasty    + th * thisydot;
-    thisy    = Saturate(thisy, poslimit);
-
-    // calculate the capture point
-    this->GetSwingFootTarget();
-
-    // PD tracking to move the swing foot to the capture point
-    yswddot = -kpsw * (lastysw - ytarget) - kdsw * (lastyswdot - ytargetdot);
-    yswddot = Saturate(yswddot, acclimitSwing);
-    thisyswdot = lastyswdot + th * yswddot;
-    thisysw = lastysw + th * thisyswdot;
-    thisysw = Saturate(thisysw, poslimit);
-
-    PlanningFootHeight();
-
-    // State transition
-    if (isaStepComplete)
+    if ( gaitState == VGS_READY )
     {
-        this->StateTransition();
-        stepCount++;
+        thisy      = 0;
+        thisydot   = 0;
+        thisysw    = 0;
+        thisyswdot = 0;
+        hsw        = 0;
+    }
+    else if ( gaitState == VGS_STARTED || gaitState == VGS_STOPPING)
+    {
+        timeRatio = (timeNow - lastTransitionTime) / halfperiod;
+        if(timeRatio > 1)
+        {
+            timeRatio -= 1;
+            lastTransitionTime = timeNow;
+            isaStepComplete = true;
+        }
+
+        // Discrete equation of spring-damped linear inverted pendulum
+        yddot = (-damp * lastydot 
+                - kspr * lasty
+                + alpha * mass * gravity / height * lasty
+                + fext[0]) / mass;
+        yddot = Saturate(yddot, acclimitStance);
+
+        thisydot = lastydot + th * yddot;
+        thisy    = lasty    + th * thisydot;
+        thisy    = Saturate(thisy, poslimit);
+
+        // calculate the capture point
+        this->GetSwingFootTarget();
+
+        // PD tracking to move the swing foot to the capture point
+        yswddot = -kpsw * (lastysw - ytarget) - kdsw * (lastyswdot - ytargetdot);
+        yswddot = Saturate(yswddot, acclimitSwing);
+        thisyswdot = lastyswdot + th * yswddot;
+        thisysw = lastysw + th * thisyswdot;
+        thisysw = Saturate(thisysw, poslimit);
+
+        PlanningFootHeight();
+
+        // State transition
+        if (isaStepComplete)
+        {
+            this->StateTransition();
+            stepLeft--;
+            if ( gaitState == VGS_STOPPING && stepLeft <= 0)
+                gaitState = VGS_STOPPED;
+            stepCount++;
+        }
+    }
+    else if ( gaitState == VGS_STOPPED )
+    {
+        // do nothing here, hold where it is
     }
 
     // Output of this virtual model

@@ -21,6 +21,8 @@ PushRecoveryPlanner::PushRecoveryPlanner(void)
     
     for(int i = 0; i < 18; i++)
         initialFeetPosition[i] = BASIC_FEET_POSITION[i];
+
+    olgaitState = OGS_OFFLINE;
 }
 
 PushRecoveryPlanner::~PushRecoveryPlanner(void)
@@ -29,17 +31,36 @@ PushRecoveryPlanner::~PushRecoveryPlanner(void)
 
 int PushRecoveryPlanner::Initialize()
 {
-    virtualPlanner.Initialize();
+    if ( olgaitState == OGS_OFFLINE ){
+        virtualPlanner.Initialize();
+        olgaitState = OGS_ONLINE;
+    }
     return 0;
 }
 
 int PushRecoveryPlanner::Start(double timeNow)
 {
-    return virtualPlanner.Start(timeNow);
+    if ( olgaitState == OGS_ONLINE ){
+        virtualPlanner.Start(timeNow);
+    }
+    return 0;
 }
 
-int PushRecoveryPlanner::Stop()
+int PushRecoveryPlanner::Stop(double timeNow)
 {
+    if ( olgaitState == OGS_ONLINE )
+    {
+        virtualPlanner.RequireStop(timeNow);
+    }
+    return 0;
+}
+
+int PushRecoveryPlanner::Offline()
+{
+    if ( olgaitState == OGS_ONLINE )
+    {
+        olgaitState = OGS_OFFLINE;
+    }
     return 0;
 }
 
@@ -57,11 +78,23 @@ int PushRecoveryPlanner::GenerateJointTrajectory(
         double externalForce[],
         double jointLength[])
 {
+    if ( olgaitState == OGS_OFFLINE)
+        return -1; // This function should not be called when olgaitState == OGS_OFFLINE
+
     virtualPlanner.DoIteration(timeNow, externalForce, legGroupPosition, legGroupPositionDot);
     this->CalculateEachLegPosition();
-    
+
     robot.SetPee(feetPosition, initialBodyPosition, "G");
     robot.GetPin(jointLength);
+
+    return 0;
+}
+
+
+int PushRecoveryPlanner::GetForwardLegPositions(double jointLengthList[], double legTipPositions[])
+{
+    robot.SetPin(jointLengthList, initialBodyPosition);
+    robot.GetPee( legTipPositions, "G");
     return 0;
 }
 

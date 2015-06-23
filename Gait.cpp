@@ -10,6 +10,7 @@
 
 namespace RobotHighLevelControl{
 
+PushRecoveryPlanner CGait::onlinePlanner;
 EGAIT CGait::m_currentGait[AXIS_NUMBER];
 long long int CGait::m_gaitStartTime[AXIS_NUMBER];
 int CGait::m_gaitCurrentIndex[AXIS_NUMBER];
@@ -21,8 +22,8 @@ int CGait::Gait_iter[AXIS_NUMBER];
 int CGait::Gait_iter_count[AXIS_NUMBER];
 bool CGait::IsConsFinished[AXIS_NUMBER];
 bool CGait::IsHomeStarted[AXIS_NUMBER];
-
-
+double CGait::m_screwLength[AXIS_NUMBER];
+int CGait::m_commandMotorCounts[AXIS_NUMBER];
 
 ///////////////////////////////////////////////
 int GaitMove[GAIT_MOVE_LEN][GAIT_WIDTH];
@@ -350,7 +351,7 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     return 0;
 };
 
-int CGait::RunGait(EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data)
+int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data)
 {
     //rt_printf("operation mode %d\n",p_data.motorsModes[0]);
     MapFeedbackDataIn(p_data);
@@ -360,6 +361,7 @@ int CGait::RunGait(EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data)
         switch(p_gait[i])
         {
             case GAIT_ONLINE:
+                // it should dealt with in a specific place
                 break;
 
             case GAIT_NULL:
@@ -869,10 +871,26 @@ int CGait::RunGait(EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data)
         }
 
     }
+
+    if (onlinePlanner.GetCurrentState() == PushRecoveryPlanner::OGS_ONLINE)
+    {
+        double force[3] = {0, 0, 0};
+        onlinePlanner.GenerateJointTrajectory( timeNow, force, m_screwLength);
+        CalculateActualMotorCounts(m_screwLength, m_commandMotorCounts);
+    }
     MapCommandDataOut(p_data);
     //rt_printf("command data pos%d\n",p_data.commandData[0].Position);
 
     return 0;
 };
+
+void CGait::CalculateActualMotorCounts(double *screwLength, int *motorCounts)
+{
+    int countPerMeter = 350 * 65536; // the counts per meter
+    for (int i = 0; i < AXIS_NUMBER; i++)
+    {
+        motorCounts[i] = countPerMeter * screwLength[i];
+    }
+}
 
 }
