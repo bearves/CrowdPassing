@@ -50,14 +50,14 @@ set(ETHERLAB_LINK_LIBS ethercat rt)
 #set(ETHERLAB_LINK_LIBS dl)
 set(LAPACK_LINK_LIBS lapacke lapack cblas refblas)
 set(ARIS_LINK_LIBS Aris_Plan Aris_DynKer Aris_ExpCal Aris_Control Aris_Core)
-#set(ARIS_LINK_LIBS Aris_Plan Aris_DynKer Aris_ExpCal Aris_Core)
+set(ARIS_NORT_LINK_LIBS Aris_Plan Aris_DynKer Aris_ExpCal Aris_Core)
 set(ROBOTS_LINK_LIBS  HexapodIII)
 
 # build programs
 set(SOURCE_FILES PRT.cpp VirtualBipedPlanner.cpp PushRecoveryPlanner.cpp)
 PREPEND(FULL_SRC PRT ${SOURCE_FILES})
 add_executable(PRT ${SOURCE_FILES})
-target_link_libraries(PRT ${ROBOTS_LINK_LIBS} ${ARIS_LINK_LIBS} ${LAPACK_LINK_LIBS} ${ETHERLAB_LINK_LIBS} ${XENOMAI_LINK_LIBS} ${SYSTEM_LINK_LIBS})
+target_link_libraries(PRT ${ROBOTS_LINK_LIBS} ${ARIS_NORT_LINK_LIBS} ${LAPACK_LINK_LIBS} ${SYSTEM_LINK_LIBS})
 
 # build another test
 set(SOURCE_FILES main.cpp VirtualBipedPlanner.cpp PushRecoveryPlanner.cpp)

@@ -27,8 +27,8 @@ print len(time)
 tplt = time / 1.0
 
 #plt.subplot(3,1, 1)
-for i in range(18):
-    plt.plot(tplt, axis[i])
+for i in range(3):
+    plt.plot(tplt[:-2:], numpy.diff(numpy.diff(axis[i])/0.001)/0.001)
     plt.hold(True)
 #plt.axis([1, 10, -40000, 40000])
 plt.show()
