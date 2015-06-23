@@ -877,6 +877,10 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
         double force[3] = {0, 0, 0};
         onlinePlanner.GenerateJointTrajectory( timeNow, force, m_screwLength);
         CalculateActualMotorCounts(m_screwLength, m_commandMotorCounts);
+        for ( int i = 0; i < AXIS_NUMBER; i++)
+        {
+            m_commandDataMapped[i].Position = m_commandMotorCounts[i];
+        }
     }
     MapCommandDataOut(p_data);
     //rt_printf("command data pos%d\n",p_data.commandData[0].Position);
