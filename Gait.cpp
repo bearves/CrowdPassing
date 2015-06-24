@@ -421,7 +421,7 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
                 m_commandDataMapped[motorID].Velocity=m_standStillData[motorID].Velocity;
                 m_commandDataMapped[motorID].Torque=m_standStillData[motorID].Torque;
 
-                rt_printf("driver %d: GAIT_NULL...\n",i);
+                //rt_printf("driver %d: GAIT_NULL...\n",i);
 
                 break;
             case GAIT_HOME:
@@ -919,6 +919,10 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
         for ( int i = 0; i < AXIS_NUMBER; i++)
         {
             m_commandDataMapped[i].Position = m_commandMotorCounts[i];
+        }
+        if (fabs(fmod(timeNow, 1.0)) < 2e-3)
+        {
+            rt_printf("OL cmd: %d\n", m_commandDataMapped[0].Position);
         }
     }
     MapCommandDataOut(p_data);

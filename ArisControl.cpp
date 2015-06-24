@@ -23,6 +23,23 @@ static EGAIT gaitcmdtemp[AXIS_NUMBER];
 Aris::RT_CONTROL::ACTUATION controlSystem;
 Aris::RT_CONTROL::CSysInitParameters initParam;
 
+static const char *GS_STRING[] = 
+{
+    "GAIT_NULL          ",
+    "GAIT_STANDSTILL    ",
+    "GAIT_HOME2START    ",
+    "GAIT_MOVE          ",
+    "GAIT_MOVE_BACK     ",
+    "GAIT_FAST_MOVE     ",
+    "GAIT_FAST_MOVE_BACK",
+    "GAIT_TROT          ",
+    "GAIT_LEGUP         ",
+    "GAIT_TURN_LEFT     ",
+    "GAIT_TURN_RIGHT    ",
+    "GAIT_HOME          ",
+    "GAIT_ONLINE        "
+};
+
 
 enum MACHINE_CMD
 {
@@ -78,6 +95,14 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
 
     double timeNow = rtCycleCounter * 0.001;
 
+    if (rtCycleCounter % 1000 == 0)
+    {
+        for( int i = 0; i < 1; i++ )
+        {
+            rt_printf("No. %d GS. %d MS. %d POS. %d \n",
+                 i, gaitcmd[i], machineData.motorsStates[i], machineData.feedbackData[i].Position);
+        }
+    }
     CommandID=msg.GetMsgID();
     switch(CommandID)
     {

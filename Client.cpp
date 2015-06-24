@@ -39,7 +39,8 @@ int OnControlCommandNeeded(Aris::Core::MSG &msg)
 
     cout<<"Please enter your command: ";
     cin>>cmd;
-    while(cmd<1||cmd>16){
+    while( cmd < 1 || cmd > 18 )
+    {
         cout<<"Not valid command ID,enter again : ";
         cin>>cmd;
     }
