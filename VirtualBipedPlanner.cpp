@@ -21,7 +21,7 @@ int VirtualBipedPlanner::Initialize()
     halfperiod= 1.6;      // second
     alpha     = 0.4;       
     beta      = 1;      
-    stepheight= 0.04;     // meter
+    stepheight= 0.05;     // meter
     kpsw      = 80;  
     kdsw      = 20;  
 

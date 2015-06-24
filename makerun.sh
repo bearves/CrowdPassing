@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd build && make && cd .. && ./build/bin/PRT
+cd build && make && cd .. 
 

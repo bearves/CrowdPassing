@@ -64,6 +64,11 @@ enum MACHINE_CMD
     ONLINEEND     = 1018
 };
 
+enum REPLY_MSG_ID
+{
+    DATA_REPORT   = 1050
+};
+
 int count;
 int rtCycleCounter = 0;
 
@@ -87,7 +92,9 @@ int initFun(Aris::RT_CONTROL::CSysInitParameters& param)
     return 0;
 };
 
-int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg)
+int tg(Aris::RT_CONTROL::CMachineData& machineData,
+       Aris::RT_CONTROL::RT_MSG& msgRecv, 
+       Aris::RT_CONTROL::RT_MSG& msgSend)
 {
     int CommandID;
 
@@ -102,8 +109,18 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
             rt_printf("No. %d GS. %d MS. %d POS. %d \n",
                  i, gaitcmd[i], machineData.motorsStates[i], machineData.feedbackData[i].Position);
         }
+        
     }
-    CommandID=msg.GetMsgID();
+    
+    //if (rtCycleCounter % 100 == 0)
+    //{
+        //msgSend.SetMsgID(DATA_REPORT);
+        //msgSend.Copy((const void*)&machineData, sizeof(machineData));
+        
+        //controlSystem.RT_PostMsg(msgSend);
+    //}
+
+    CommandID=msgRecv.GetMsgID();
     switch(CommandID)
     {
         case Aris::RT_CONTROL::RT_MSG::INVALID_MSG_ID:
@@ -537,9 +554,10 @@ int main(int argc, char** argv)
 
     //controlSystem.SetModeCycVel();
 
-    initParam.motorNum=18;
-    initParam.homeHighSpeed=280000;
-    initParam.homeLowSpeed=40000;
+    initParam.motorNum      = 18;
+    initParam.homeHighSpeed = 280000;
+    initParam.homeLowSpeed  = 40000;
+    initParam.homeMode      = -1;
 
     ////necessary steps
     initParam.homeOffsets=HEXBOT_HOME_OFFSETS_RESOLVER;

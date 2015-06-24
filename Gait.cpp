@@ -913,7 +913,7 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
 
     if (onlinePlanner.GetCurrentState() == PushRecoveryPlanner::OGS_ONLINE)
     {
-        double force[3] = {0, 0, 0};
+        double force[3] = {90.0, 0, 0};
         onlinePlanner.GenerateJointTrajectory( timeNow, force, m_screwLength);
         CalculateActualMotorCounts(m_screwLength, m_commandMotorCounts);
         for ( int i = 0; i < AXIS_NUMBER; i++)
