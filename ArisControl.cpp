@@ -61,6 +61,11 @@ void* MessageLoopDaemon(void *)
 
 int initFun(Aris::RT_CONTROL::CSysInitParameters& param)
 {
+    for ( int i = 0; i < AXIS_NUMBER; i++)
+    {
+        gaitcmd[i] = GAIT_NULL;
+        gaitcmdtemp[i] = GAIT_NULL;
+    }
     gait.InitGait(param);
     return 0;
 };
@@ -82,6 +87,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_NONE;
+                gaitcmd[i] = GAIT_NULL;
             }
             rt_printf("NONE Command Get in NRT\n" );
             break;
@@ -91,6 +97,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_ENABLE;
+                gaitcmd[i] = GAIT_NULL;
             }
             rt_printf("ENABLE Command Get in NRT\n" );
 
@@ -100,6 +107,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_POWEROFF;
+                gaitcmd[i] = GAIT_NULL;
             }
             rt_printf("POWEROFF Command Get in NRT\n" );
 
@@ -109,6 +117,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_STOP;
+                gaitcmd[i] = GAIT_NULL;
             }
             rt_printf("STOP Command Get in NRT\n" );
 
@@ -118,6 +127,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,Aris::RT_CONTROL::RT_MSG& msg
             for(int i=0;i<18;i++)
             {
                 machineData.motorsCommands[i]=EMCMD_RUNNING;
+                gaitcmd[i] = GAIT_STANDSTILL;
             }
             rt_printf("RUNNING Command Get in NRT\n" );
             break;
