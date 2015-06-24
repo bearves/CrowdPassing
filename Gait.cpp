@@ -122,6 +122,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
     fin.open("../../resource/gait/TL.txt");
 
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0;i<GAIT_TURN_LEN;i++)
     {
         fin>>Line_Num;
@@ -133,11 +136,11 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
         }
     }
-
-
     fin.close();
 
     fin.open("../../resource/gait/TR.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
 
     for(int i=0;i<GAIT_TURN_LEN;i++)
     {
@@ -152,10 +155,11 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
         }
     }
 
-
     fin.close();
 
     fin.open("../../resource/gait/leg_up.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
 
     for(int i=0;i<GAIT_LEGUP_LEN;i++)
     {
@@ -173,6 +177,8 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     fin.close();
 
     fin.open("../../resource/gait/start.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
 
     for(int i=0;i<GAIT_HOME2START_LEN;i++)
     {
@@ -192,6 +198,8 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     fin.close();
     /*FOWARD*/
     fin.open("../../resource/gait/acc.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
     for(int i=0; i<GAIT_ACC_LEN;i++)
     {
         fin>>Line_Num;
@@ -206,6 +214,8 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
 
     fin.open("../../resource/gait/cons.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
     for(int i=0+GAIT_ACC_LEN; i<GAIT_ACC_LEN+GAIT_CON_LEN;i++)
     {
         fin>>Line_Num;
@@ -218,6 +228,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     }
     fin.close();
     fin.open("../../resource/gait/dec.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0+GAIT_ACC_LEN+GAIT_CON_LEN; i<GAIT_ACC_LEN+GAIT_CON_LEN+GAIT_DEC_LEN;i++)
     {
         fin>>Line_Num;
@@ -232,6 +245,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
     /*backward*/
     fin.open("../../resource/gait/back_acc.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0; i<GAIT_ACC_LEN;i++)
     {
         fin>>Line_Num;
@@ -246,6 +262,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
 
     fin.open("../../resource/gait/back_cons.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0+GAIT_ACC_LEN; i<GAIT_ACC_LEN+GAIT_CON_LEN;i++)
     {
         fin>>Line_Num;
@@ -258,6 +277,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     }
     fin.close();
     fin.open("../../resource/gait/back_dec.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0+GAIT_ACC_LEN+GAIT_CON_LEN; i<GAIT_ACC_LEN+GAIT_CON_LEN+GAIT_DEC_LEN;i++)
     {
         fin>>Line_Num;
@@ -273,6 +295,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     /*fast FOWARD*/
 
     fin.open("../../resource/gait/fast_acc.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0; i<GAIT_FAST_ACC_LEN;i++)
     {
         fin>>Line_Num;
@@ -286,6 +311,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
 
     fin.open("../../resource/gait/fast_cons.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0+GAIT_FAST_ACC_LEN; i<GAIT_FAST_ACC_LEN+GAIT_FAST_CON_LEN;i++)
     {
         fin>>Line_Num;
@@ -298,6 +326,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
     fin.close();
     fin.open("../../resource/gait/fast_dec.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0+GAIT_FAST_ACC_LEN+GAIT_FAST_CON_LEN; i<GAIT_FAST_ACC_LEN+GAIT_FAST_CON_LEN+GAIT_FAST_DEC_LEN;i++)
     {
         fin>>Line_Num;
@@ -311,6 +342,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     /*fast backward*/
 
     fin.open("../../resource/gait/fast_back_acc.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0; i<GAIT_FAST_ACC_LEN;i++)
     {
         fin>>Line_Num;
@@ -324,6 +358,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
 
     fin.open("../../resource/gait/fast_back_const.txt");
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     for(int i=0+GAIT_FAST_ACC_LEN; i<GAIT_FAST_ACC_LEN+GAIT_FAST_CON_LEN;i++)
     {
         fin>>Line_Num;
@@ -335,6 +372,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
     }
 
     fin.close();
+    if(fin.fail())
+        goto OPEN_FILE_FAIL;
+
     fin.open("../../resource/gait/fast_back_dec.txt");
     for(int i=0+GAIT_FAST_ACC_LEN+GAIT_FAST_CON_LEN; i<GAIT_FAST_ACC_LEN+GAIT_FAST_CON_LEN+GAIT_FAST_DEC_LEN;i++)
     {
@@ -348,7 +388,12 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
     fin.close();
 
+    cout << "All files sucessfully read" << endl;
     return 0;
+
+OPEN_FILE_FAIL:
+    cerr << "Open file error: " << strerror(errno) << endl;
+    return errno;
 };
 
 int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data)
@@ -365,9 +410,9 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
                 break;
 
             case GAIT_NULL:
-                p_gait[i]=GAIT_STANDSTILL;
                 CGait::m_gaitState[i]=EGaitState::GAIT_STOP;
 
+                m_currentGait[i] = p_gait[i];
                 m_standStillData[motorID].Position=m_feedbackDataMapped[motorID].Position;
                 m_standStillData[motorID].Velocity=m_feedbackDataMapped[motorID].Velocity;
                 m_standStillData[motorID].Torque=m_feedbackDataMapped[motorID].Torque;
@@ -376,11 +421,12 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
                 m_commandDataMapped[motorID].Velocity=m_standStillData[motorID].Velocity;
                 m_commandDataMapped[motorID].Torque=m_standStillData[motorID].Torque;
 
-                rt_printf("driver %d: GAIT_NONE will transfer to GAIT_STANDSTILL...\n",i);
+                rt_printf("driver %d: GAIT_NULL...\n",i);
 
                 break;
             case GAIT_HOME:
 
+                m_currentGait[i] = p_gait[i];
                 m_commandDataMapped[motorID].Position=m_feedbackDataMapped[motorID].Position;
                 m_commandDataMapped[motorID].Velocity=m_feedbackDataMapped[motorID].Velocity;
                 m_commandDataMapped[motorID].Torque=m_feedbackDataMapped[motorID].Torque;
@@ -860,13 +906,6 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
                         }
                     }
                 }
-                break;
-
-
-            default:
-                p_gait[i]=GAIT_STANDSTILL;
-                rt_printf("enter the default\n");
-
                 break;
         }
 

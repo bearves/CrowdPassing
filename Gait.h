@@ -48,21 +48,21 @@ namespace RobotHighLevelControl
 
 const int MapAbsToPhy[18]=
 {
-    10,	11,	9,
-    12,	14,	13,
-    17,	15,	16,
-    6,	8,	7,
-    3,	5,	4,
-    0,	2,	1
+    10, 11, 9,
+    12, 14, 13,
+    17, 15, 16,
+    6,  8,  7,
+    3,  5,  4,
+    0,  2,  1
 };
 const int MapPhyToAbs[18]=
 {
-    15,	17,	16,
-    12,	14,	13,
-    9,	11,	10,
-    2,	0,	1,
-    3,	5,	4,
-    7,	8,	6
+    15, 17, 16,
+    12, 14, 13,
+    9,  11, 10,
+    2,  0,  1,
+    3,  5,  4,
+    7,  8,  6
 };
 
 
@@ -83,7 +83,7 @@ enum EGAIT
     GAIT_MOVE_BACK      = 4,
     GAIT_FAST_MOVE      = 5,
     GAIT_FAST_MOVE_BACK = 6,
-    GAIT_TROT           = 7,
+    //GAIT_TROT           = 7,
     GAIT_LEGUP          = 8,
     GAIT_TURN_LEFT      = 9,
     GAIT_TURN_RIGHT     = 10,
