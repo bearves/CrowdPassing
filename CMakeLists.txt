@@ -15,7 +15,7 @@ project(PushRecoveryTest)
 
 # set compile options
 if(UNIX)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")
 endif(UNIX)
 
 # set binary and library folders
@@ -24,22 +24,23 @@ set(LIBRARY_OUTPUT_PATH lib)
 
 # set include and lib folders
 if(UNIX)
-include_directories("/usr/lapack/include")
-include_directories("/home/hex/Aris_with_force/src/Aris_Control")
-include_directories("/home/hex/Aris_with_force/src/Aris_Core")
-include_directories("/home/hex/Aris_with_force/src/Aris_Plan")
-include_directories("/home/hex/Aris_with_force/src/Aris_DynKer")
-include_directories("/home/hex/Aris_with_force/src/Aris_ExpCal")
-include_directories("/home/hex/Aris_with_force/src")
+    set(ARIS_SOURCE_LOCATION "/home/sun/Projects/Aris")
+    include_directories("/usr/lapack/include")
+    include_directories(${ARIS_SOURCE_LOCATION}/src/Aris_Control)
+    include_directories(${ARIS_SOURCE_LOCATION}/src/Aris_Core)
+    include_directories(${ARIS_SOURCE_LOCATION}/src/Aris_Plan)
+    include_directories(${ARIS_SOURCE_LOCATION}/src/Aris_DynKer)
+    include_directories(${ARIS_SOURCE_LOCATION}/src/Aris_ExpCal)
+    include_directories(${ARIS_SOURCE_LOCATION}/src)
 
-include_directories("/usr/xenomai/include")
-include_directories("/opt/etherlab/include")
-include_directories("/usr/Robots/include")
-link_directories(/usr/lapack/lib)
-link_directories(/home/hex/Aris_with_force/build/lib)
-link_directories(/usr/xenomai/lib)
-link_directories(/opt/etherlab/lib)
-link_directories(/usr/Robots/lib)
+    include_directories("/usr/xenomai/include")
+    include_directories("/opt/etherlab/include")
+    include_directories("/usr/Robots/include")
+    link_directories(/usr/lapack/lib)
+    link_directories(${ARIS_SOURCE_LOCATION}/build/lib)
+    link_directories(/usr/xenomai/lib)
+    link_directories(/opt/etherlab/lib)
+    link_directories(/usr/Robots/lib)
 endif(UNIX)
 
 # set link files

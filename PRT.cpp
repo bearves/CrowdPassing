@@ -59,12 +59,14 @@ int main(int argc, char** argv)
 
 void ApplyForce( double timeNow, double* fxt )
 {
-    if (timeNow > 1 && timeNow < 18.4)
+    if (timeNow > 7.5 && timeNow < 20.5)
     {
-        fxt[0] = 120;
+        fxt[0] = 0;
+        fxt[1] = 250;
     }
     else
     {
         fxt[0] = 0;
+        fxt[1] = 0;
     }
 }

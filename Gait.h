@@ -99,7 +99,7 @@ class CGait
         ~CGait();
         //read txt to array
         static int InitGait(Aris::RT_CONTROL::CSysInitParameters& param);
-        static int RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data);
+        static int RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData& p_data, double* givenForce);
         static bool IsGaitFinished();
         static bool IsHomeStarted[AXIS_NUMBER];
         static bool IsConsFinished[AXIS_NUMBER];

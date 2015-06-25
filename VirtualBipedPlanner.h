@@ -7,7 +7,7 @@ class VirtualBipedPlanner
 {
 public:
 
-    static const int STEP_TO_COMPLETELY_STOP = 8;
+    static const int STEP_TO_COMPLETELY_STOP = 10;
 
     enum VIRTUAL_GAIT_STATE
     {
@@ -30,22 +30,22 @@ public:
 
 private:
     // State variables
-    double yddot;
-    double lastydot;
-    double thisydot;
+    double yddot[2];
+    double lastydot[2];
+    double thisydot[2];
     
-    double lasty;
-    double thisy;
+    double lasty[2];
+    double thisy[2];
     
-    double yswddot;
-    double lastyswdot;
-    double thisyswdot;
+    double yswddot[2];
+    double lastyswdot[2];
+    double thisyswdot[2];
 
-    double lastysw;
-    double thisysw;
+    double lastysw[2];
+    double thisysw[2];
 
-    double ytarget;
-    double ytargetdot;
+    double ytarget[2];
+    double ytargetdot[2];
 
     double hsw;
 
@@ -55,9 +55,17 @@ private:
     double requireStopTime;
     double lastTransitionTime;
 
+    // Temp varaibles for calculate swing target
+    double ysw1[2];
+    double ysw1dot[2]; 
+    double ysw2[2];    
+    double ysw2dot[2]; 
+    double ysw3[2];    
+    double ysw3dot[2]; 
+
     // output variables
-    double ygrp[2];
-    double ygrpdot[2];
+    double ygrp[4];
+    double ygrpdot[4];
     double hgrp[2];
 
     // Physical parameters
@@ -73,6 +81,8 @@ private:
     double stepheight;// step height
     double kpsw;      // kp of swing leg tracking
     double kdsw;      // kd of swing leg tracking
+    double ksat;      // virtual spring for limit the position range
+    double satEffectRange; // effect range of the position limit spring
 
     double u1;        // for calculate swing leg target point
     double u2;
@@ -89,6 +99,7 @@ private:
     VIRTUAL_GAIT_STATE gaitState;
 
     double Saturate(double ainput, double limit);
+    double SaturateSpringDamper(double y, double limit, double effectRange);
     int GetSwingFootTarget();
     int StateTransition();
     int PlanningFootHeight();

@@ -12,18 +12,20 @@ VirtualBipedPlanner::~VirtualBipedPlanner()
 int VirtualBipedPlanner::Initialize()
 {
     th        = 0.001;    // s
-    mass      = 260;      // kg
+    mass      = 200;      // kg
     height    = 0.85;     // meter
     gravity   = 9.81;     // m/s^2
-    damp      = 1600;     // N/(m/s) 
+    damp      = 1400;     // N/(m/s) 
     kspr      = 100;      // N/m
 
     halfperiod= 1.6;      // second
     alpha     = 0.4;       
     beta      = 1;      
-    stepheight= 0.05;     // meter
+    stepheight= 0.045;    // meter
     kpsw      = 80;  
     kdsw      = 20;  
+    ksat      = 5000;
+    satEffectRange = 0.05;
 
     u1        = 0.05;
     u2        = 0.1;
@@ -33,19 +35,23 @@ int VirtualBipedPlanner::Initialize()
     acclimitStance = 1.0; // m/s/s
     acclimitSwing  = 1.6; // m/s/s
     vellimit       = 2;   // m/s
-    poslimit       = 0.2; // m
+    poslimit       = 0.25; // m
 
-    lastydot = 0;
-    thisydot = 0;
+    // Set intial condition for both horizontal dimensions
+    for( int i = 0; i < 2; i++)
+    {
+        lastydot[i] = 0;
+        thisydot[i] = 0;
 
-    lasty = 0;
-    thisy = 0;
+        lasty[i] = 0;
+        thisy[i] = 0;
 
-    lastyswdot = 0;
-    thisyswdot = 0;
+        lastyswdot[i] = 0;
+        thisyswdot[i] = 0;
 
-    lastysw = 0;
-    thisysw = 0;
+        lastysw[i] = 0;
+        thisysw[i] = 0;
+    }
 
     hsw = 0;
 
@@ -93,15 +99,20 @@ int VirtualBipedPlanner::DoIteration(
     if ( gaitState == VGS_STOPPING)
     {
         fext[0] = 0;
+        fext[1] = 0;
     }
 
     if ( gaitState == VGS_READY )
     {
-        thisy      = 0;
-        thisydot   = 0;
-        thisysw    = 0;
-        thisyswdot = 0;
-        hsw        = 0;
+        for( int i = 0; i < 2; i++)
+        {
+            thisy[i]      = 0;
+            thisydot[i]   = 0;
+            thisysw[i]    = 0;
+            thisyswdot[i] = 0;
+        }
+
+        hsw = 0;
     }
     else if ( gaitState == VGS_STARTED || gaitState == VGS_STOPPING)
     {
@@ -113,27 +124,32 @@ int VirtualBipedPlanner::DoIteration(
             isaStepComplete = true;
         }
 
-        // Discrete equation of spring-damped linear inverted pendulum
-        yddot = (-damp * lastydot 
-                - kspr * lasty
-                + alpha * mass * gravity / height * lasty
-                + fext[0]) / mass;
-        yddot = Saturate(yddot, acclimitStance);
+        for( int i = 0; i < 2; i++)
+        {
+            // Discrete equation of spring-damped linear inverted pendulum
+            yddot[i] = (-damp * lastydot[i] 
+                    - kspr * lasty[i]
+                    + alpha * mass * gravity / height * lasty[i]
+                    + fext[i]) / mass;
+                    //+ SaturateSpringDamper(lasty[i], poslimit, satEffectRange);
 
-        thisydot = lastydot + th * yddot;
-        thisy    = lasty    + th * thisydot;
-        thisy    = Saturate(thisy, poslimit);
+            yddot[i] = Saturate(yddot[i], acclimitStance);
 
-        // calculate the capture point
-        this->GetSwingFootTarget();
+            thisydot[i] = lastydot[i] + th * yddot[i];
+            thisy[i]    = lasty[i]    + th * thisydot[i];
+            thisy[i]    = Saturate(thisy[i], poslimit);
 
-        // PD tracking to move the swing foot to the capture point
-        yswddot = -kpsw * (lastysw - ytarget) - kdsw * (lastyswdot - ytargetdot);
-        yswddot = Saturate(yswddot, acclimitSwing);
-        thisyswdot = lastyswdot + th * yswddot;
-        thisysw = lastysw + th * thisyswdot;
-        thisysw = Saturate(thisysw, poslimit);
+            // calculate the capture point
+            this->GetSwingFootTarget();
 
+            // PD tracking to move the swing foot to the capture point
+            yswddot[i] = -kpsw * (lastysw[i] - ytarget[i]) - kdsw * (lastyswdot[i] - ytargetdot[i]);
+            yswddot[i] = Saturate(yswddot[i], acclimitSwing);
+            thisyswdot[i] = lastyswdot[i] + th * yswddot[i];
+            thisysw[i] = lastysw[i] + th * thisyswdot[i];
+            thisysw[i] = Saturate(thisysw[i], poslimit);
+
+        }
         PlanningFootHeight();
 
         // State transition
@@ -155,17 +171,21 @@ int VirtualBipedPlanner::DoIteration(
     this->AssignStateToCorrespondFoot();
     for (int i = 0; i < 2; i++)
     {
-        pgrp[i * 3 + 0] = ygrp[i];
+        pgrp[i * 3 + 0] = ygrp[i * 2 + 0];
         pgrp[i * 3 + 1] = hgrp[i];
-        pgrpdot[i * 3 + 0] = ygrpdot[i];
+        pgrp[i * 3 + 2] = ygrp[i * 2 + 1];
+        pgrpdot[i * 3 + 0] = ygrpdot[i * 2 + 0];
+        pgrpdot[i * 3 + 2] = ygrpdot[i * 2 + 1];
     }
 
     // State updating
-    lastysw = thisysw;
-    lastyswdot = thisyswdot;
-    lasty = thisy;
-    lastydot = thisydot;
-
+    for (int i = 0; i < 2; i++)
+    {
+        lastysw[i] = thisysw[i];
+        lastyswdot[i] = thisyswdot[i];
+        lasty[i] = thisy[i];
+        lastydot[i] = thisydot[i];
+    }
     return 0;
 }
 
@@ -184,56 +204,76 @@ double VirtualBipedPlanner::Saturate( double ainput, double limit )
         return ainput;
     }
 }
+double VirtualBipedPlanner::SaturateSpringDamper(double y, double limit, double effectRange)
+{    
+    if (y > fabs(limit) - fabs(effectRange))
+    {
+        double penetrate = y - (fabs(limit) - fabs(effectRange));
+        return -ksat * penetrate;
+    }
+    else if ( y < -(fabs(limit) - fabs(effectRange)) )
+    {
+        double penetrate = -(fabs(limit) - fabs(effectRange)) - y;
+        return ksat * penetrate;
+    }
+    return 0; 
+}
 
 int VirtualBipedPlanner::GetSwingFootTarget()
 {
-    // target due to different situations
-    double ysw1 = lastysw + lastyswdot * th;
-    double ysw1dot = lastyswdot;
-    double ysw2 = beta * sqrt(height / gravity) * thisydot;
-    double ysw2dot = beta * sqrt(height / gravity) * yddot;
-    double ysw3 = lastysw - thisydot * th;
-    double ysw3dot = -thisydot;
     double p = 0;
-    // do blending
-    if (timeRatio < u1)
+    for( int i = 0; i < 2; i++)
     {
-        ytarget = ysw1;
-        ytargetdot = ysw1dot;
-    }
-    else if (timeRatio < u2)
-    {
-        p = (timeRatio - u1) / (u2 - u1);
-        ytarget = ysw1 * (1-p) + ysw2 * p;
-        ytargetdot = ysw1dot * (1-p) + ysw2dot * p;
-    }
-    else if (timeRatio < w1)
-    {
-        ytarget = ysw2;
-        ytargetdot = ysw2dot;
-    }
-    else if (timeRatio < w2)
-    {
-        p = (timeRatio - w1) / (w2 - w1);
-        ytarget = ysw2 * (1-p) + ysw3 * p;
-        ytargetdot = ysw2dot * (1-p) + ysw3dot * p;
-    }
-    else
-    {
-        ytarget = ysw3;
-        ytargetdot = ysw3dot;
+        // target due to different situations
+        ysw1[i]    = lastysw[i] + lastyswdot[i] * th;
+        ysw1dot[i] = lastyswdot[i];
+        ysw2[i]    = beta * sqrt(height / gravity) * thisydot[i];
+        ysw2dot[i] = beta * sqrt(height / gravity) * yddot[i];
+        ysw3[i]    = lastysw[i] - thisydot[i] * th;
+        ysw3dot[i] = -thisydot[i];
+        // do blending
+        if (timeRatio < u1)
+        {
+            ytarget[i] = ysw1[i];
+            ytargetdot[i] = ysw1dot[i];
+        }
+        else if (timeRatio < u2)
+        {
+            p = (timeRatio - u1) / (u2 - u1);
+            ytarget[i] = ysw1[i] * (1-p) + ysw2[i] * p;
+            ytargetdot[i] = ysw1dot[i] * (1-p) + ysw2dot[i] * p;
+        }
+        else if (timeRatio < w1)
+        {
+            ytarget[i] = ysw2[i];
+            ytargetdot[i] = ysw2dot[i];
+        }
+        else if (timeRatio < w2)
+        {
+            p = (timeRatio - w1) / (w2 - w1);
+            ytarget[i] = ysw2[i] * (1-p) + ysw3[i] * p;
+            ytargetdot[i] = ysw2dot[i] * (1-p) + ysw3dot[i] * p;
+        }
+        else
+        {
+            ytarget[i] = ysw3[i];
+            ytargetdot[i] = ysw3dot[i];
+        }
     }
     return 0;
 }
 
 int VirtualBipedPlanner::StateTransition()
 {
-    double tmp = thisy;
-    double tmpdot = thisydot;
-    thisy = -thisysw;
-    thisydot = -thisyswdot;
-    thisysw = -tmp;
-    thisyswdot = -tmpdot;
+    for(int i = 0; i < 2; i++)
+    {
+        double tmp = thisy[i];
+        double tmpdot = thisydot[i];
+        thisy[i] = -thisysw[i];
+        thisydot[i] = -thisyswdot[i];
+        thisysw[i] = -tmp;
+        thisyswdot[i] = -tmpdot;
+    }
     return 0;
 }
 
@@ -267,13 +307,15 @@ int VirtualBipedPlanner::AssignStateToCorrespondFoot()
         stanceLeg = 1;
         swingLeg = 0;
     }
-    ygrp[stanceLeg] = -thisy;
-    ygrpdot[stanceLeg] = -thisydot;
+    for(int i = 0; i < 2; i++)
+    {
+        ygrp[stanceLeg * 2 + i] = -thisy[i];
+        ygrpdot[stanceLeg * 2 + i] = -thisydot[i];
+        ygrp[swingLeg * 2 + i] = thisysw[i];
+        ygrpdot[swingLeg * 2 + i] = thisyswdot[i];
+    }
     hgrp[stanceLeg] = 0;
-    ygrp[swingLeg] = thisysw;
-    ygrpdot[swingLeg] = thisyswdot;
     hgrp[swingLeg] = hsw;
-
     return 0;
 }
 

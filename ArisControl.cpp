@@ -40,6 +40,22 @@ static const char *GS_STRING[] =
     "GAIT_ONLINE        "
 };
 
+static const double forceForTest[] =
+{
+    0,   0,   0,
+    90,  0,   0,
+    120, 0,   0,
+    260, 0,   0,
+    0,   90,  0,
+    0,   120, 0,
+    0,   260, 0,
+    60,  60,  0,
+    100, 100, 0
+};
+
+double givenForce[] = {0, 0, 0};
+
+static int forceSelectionFlag = 0;
 
 enum MACHINE_CMD
 {
@@ -61,7 +77,16 @@ enum MACHINE_CMD
     TURNRIGHT     = 1015,
     ONLINEGAIT    = 1016,
     ONLINEBEGIN   = 1017,
-    ONLINEEND     = 1018
+    ONLINEEND     = 1018,
+    SET_NO_FORCE  = 1025,
+    SET_FORCE_1   = 1026,
+    SET_FORCE_2   = 1027,
+    SET_FORCE_3   = 1028,
+    SET_FORCE_4   = 1029,
+    SET_FORCE_5   = 1030,
+    SET_FORCE_6   = 1031,
+    SET_FORCE_7   = 1032,
+    SET_FORCE_8   = 1033
 };
 
 enum REPLY_MSG_ID
@@ -88,6 +113,7 @@ int initFun(Aris::RT_CONTROL::CSysInitParameters& param)
         gaitcmd[i] = GAIT_NULL;
         gaitcmdtemp[i] = GAIT_NULL;
     }
+    forceSelectionFlag = 0;
     gait.InitGait(param);
     return 0;
 };
@@ -108,6 +134,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
         {
             rt_printf("No. %d GS. %d MS. %d POS. %d \n",
                  i, gaitcmd[i], machineData.motorsStates[i], machineData.feedbackData[i].Position);
+            rt_printf("Force given: %4.1lf, %4.1lf, %4.1lf\n", givenForce[0], givenForce[1], givenForce[2]);
         }
         
     }
@@ -417,12 +444,45 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
             gait.onlinePlanner.Stop(timeNow);
             break;
 
+        case SET_NO_FORCE:
+            forceSelectionFlag = 0;
+            break;
+
+        case SET_FORCE_1:
+            forceSelectionFlag = 1;
+            break;
+        case SET_FORCE_2:
+            forceSelectionFlag = 2;
+            break;
+        case SET_FORCE_3:
+            forceSelectionFlag = 3;
+            break;
+        case SET_FORCE_4:
+            forceSelectionFlag = 4;
+            break;
+        case SET_FORCE_5:
+            forceSelectionFlag = 5;
+            break;
+        case SET_FORCE_6:
+            forceSelectionFlag = 6;
+            break;
+        case SET_FORCE_7:
+            forceSelectionFlag = 7;
+            break;
+        case SET_FORCE_8:
+            forceSelectionFlag = 8;
+            break;
+
         default:
             //DO NOTHING, CMD AND TRAJ WILL KEEP STILL
             break;
     }
 
-    gait.RunGait(timeNow, gaitcmd,machineData);
+    for(int i = 0; i < 3; i++)
+    {
+        givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
+    }
+    gait.RunGait(timeNow, gaitcmd,machineData, givenForce);
 
     return 0;
 
@@ -520,6 +580,45 @@ int OnGetControlCommand(Aris::Core::MSG &msg)
             data.SetMsgID(ONLINEEND);
             controlSystem.NRT_PostMsg(data);
             break;
+
+        case 19:
+            data.SetMsgID(SET_NO_FORCE);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 20:
+            data.SetMsgID(SET_FORCE_1);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 21:
+            data.SetMsgID(SET_FORCE_2);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 22:
+            data.SetMsgID(SET_FORCE_3);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 23:
+            data.SetMsgID(SET_FORCE_4);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 24:
+            data.SetMsgID(SET_FORCE_5);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 25:
+            data.SetMsgID(SET_FORCE_6);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 26:
+            data.SetMsgID(SET_FORCE_7);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 27:
+            data.SetMsgID(SET_FORCE_8);
+            controlSystem.NRT_PostMsg(data);
+            break;
+
+
         default:
             printf("Hi! I didn't get validate cmd\n");
             break;
