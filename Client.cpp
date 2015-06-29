@@ -39,10 +39,11 @@ int OnControlCommandNeeded(Aris::Core::MSG &msg)
     cout << "19.No force"    << endl << "20.Force 1"       << endl << "21.Force 2"       << endl;
     cout << "22.Force 3"     << endl << "23.Force 4"       << endl << "24.Force 5"       << endl;
     cout << "25.Force 6"     << endl << "26.Force 7"       << endl << "27.Force 8"       << endl;
+    cout << "28.Clear force" << endl;
 
     cout<<"Please enter your command: ";
     cin>>cmd;
-    while( cmd < 1 || cmd > 27 )
+    while( cmd < 1 || cmd > 28 )
     {
         cout<<"Not valid command ID,enter again : ";
         cin>>cmd;

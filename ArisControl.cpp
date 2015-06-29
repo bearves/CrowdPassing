@@ -86,7 +86,8 @@ enum MACHINE_CMD
     SET_FORCE_5   = 1030,
     SET_FORCE_6   = 1031,
     SET_FORCE_7   = 1032,
-    SET_FORCE_8   = 1033
+    SET_FORCE_8   = 1033,
+    CLEAR_FORCE   = 1034
 };
 
 enum REPLY_MSG_ID
@@ -138,7 +139,13 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
         }
         
     }
-    
+    if (rtCycleCounter % 200 == 0){
+        rt_printf("Actual Force: %4.1lf, %4.1lf, %4.1lf\n", 
+                    machineData.forceData[0].forceValues[0]/1000.0,
+                    machineData.forceData[0].forceValues[1]/1000.0,
+                    machineData.forceData[0].forceValues[2]/1000.0);
+    }
+
     //if (rtCycleCounter % 100 == 0)
     //{
         //msgSend.SetMsgID(DATA_REPORT);
@@ -472,16 +479,36 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
         case SET_FORCE_8:
             forceSelectionFlag = 8;
             break;
+        case CLEAR_FORCE:
+            machineData.forceData[0].isZeroingRequest = 1;
+            break; 
 
         default:
             //DO NOTHING, CMD AND TRAJ WILL KEEP STILL
             break;
     }
 
+    /*for(int i = 0; i < 3; i++)*/
+    //{
+        ////givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
+    /*}*/
+
+    givenForce[0] = machineData.forceData[0].forceValues[1] / 1000.0;
+    givenForce[1] = machineData.forceData[0].forceValues[0] / 1000.0;
+    givenForce[2] = machineData.forceData[0].forceValues[2] / 1000.0;
+ 
     for(int i = 0; i < 3; i++)
     {
-        givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
+        //givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
+        if (fabs(givenForce[i]) < 10.0)
+            givenForce[i] = 0;
+        if (givenForce[i] > 100.0)
+            givenForce[i] = 100.0;
+        if (givenForce[i] < -100.0)
+            givenForce[i] = -100.0;
     }
+
+   
     gait.RunGait(timeNow, gaitcmd,machineData, givenForce);
 
     return 0;
@@ -617,7 +644,10 @@ int OnGetControlCommand(Aris::Core::MSG &msg)
             data.SetMsgID(SET_FORCE_8);
             controlSystem.NRT_PostMsg(data);
             break;
-
+        case 28:
+            data.SetMsgID(CLEAR_FORCE);
+            controlSystem.NRT_PostMsg(data);
+            break;
 
         default:
             printf("Hi! I didn't get validate cmd\n");
