@@ -40,7 +40,7 @@ for i in range(3):
 #plt.axis([1, 10, -40000, 40000])
 
 plt.subplot(3,1, 3)
-for i in range(3):
+for i in range(18):
     plt.plot(tplt[:-2:], numpy.diff(numpy.diff( (axis[i]))/0.001)/0.001)
     plt.hold(True)
 plt.hold(False)

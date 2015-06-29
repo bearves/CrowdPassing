@@ -27,23 +27,19 @@ int main(int argc, char** argv)
     {
         double timeNow = step*0.001;
 
-        if ( step == 3200 )
+        if ( step == 0 )
         {
             planner.Start(timeNow);
         }
-        if ( step == 13000 )
+        if ( step == 20000 )
         {
             planner.Stop(timeNow);
-        }
-        if ( step == 15000 )
-        {
-            planner.Start(timeNow);
         }
         ApplyForce(timeNow, fext);
         planner.GenerateJointTrajectory(timeNow, fext, screwLength);
         planner.GetForwardLegPositions(screwLength, legTipPositions);
         trjfile << timeNow << "  ";
-        for (auto len : legTipPositions)
+        for (auto len : screwLength)
         {
             trjfile << std::setprecision(12) << len << "  ";
         }
@@ -59,10 +55,10 @@ int main(int argc, char** argv)
 
 void ApplyForce( double timeNow, double* fxt )
 {
-    if (timeNow > 7.5 && timeNow < 20.5)
+    if (timeNow > 0.6 && timeNow < 14)
     {
-        fxt[0] = 0;
-        fxt[1] = 250;
+        fxt[0] = 90;
+        fxt[1] = 90;
     }
     else
     {

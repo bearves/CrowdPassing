@@ -15,21 +15,21 @@ int VirtualBipedPlanner::Initialize()
     mass      = 200;      // kg
     height    = 0.85;     // meter
     gravity   = 9.81;     // m/s^2
-    damp      = 1400;     // N/(m/s) 
-    kspr      = 100;      // N/m
+    damp      = 800;     // N/(m/s) 
+    kspr      = 300;      // N/m
 
     halfperiod= 1.6;      // second
-    alpha     = 0.4;       
-    beta      = 1;      
+    alpha     = 0.1;       
+    beta      = 2.8;
     stepheight= 0.045;    // meter
-    kpsw      = 80;  
+    kpsw      = 64;  
     kdsw      = 20;  
     ksat      = 5000;
     satEffectRange = 0.05;
 
-    u1        = 0.05;
-    u2        = 0.1;
-    w1        = 0.85;
+    u1        = 0.01;
+    u2        = 0.08;
+    w1        = 0.898;
     w2        = 0.9;
 
     acclimitStance = 1.0; // m/s/s
@@ -279,20 +279,23 @@ int VirtualBipedPlanner::StateTransition()
 
 int VirtualBipedPlanner::PlanningFootHeight()
 {
-    double tacc = 0.5;
+    double tacc = 0.25;
     double theta = 0;
     double pi = 3.14159265359;
+    double acc = pi / tacc / (1 - tacc);
+    double vlel = acc * tacc;
     if (timeRatio < tacc)
     {
-        theta = 2 * pi * (timeRatio / tacc * 0.5) * (timeRatio / tacc * 0.5);
+        theta = 0.5 * (timeRatio * timeRatio) * acc;
     }
-    else if (timeRatio > 1 - tacc)
+    else if (timeRatio < 1 - tacc)
     {
-        theta = pi - 2 * pi * ((1 - timeRatio) / tacc * 0.5) * ((1 - timeRatio) / tacc * 0.5);
+        theta = 0.5 * vlel * tacc + vlel * (timeRatio - tacc);
     }
     else
     {
-        theta = pi / 2.0;
+        double tt = timeRatio - 1 + tacc;
+        theta = vlel * (1 - 1.5 * tacc) + vlel * tt - 0.5 * tt * tt * acc;
     }
     hsw = stepheight * sin(theta);
     return 0;
