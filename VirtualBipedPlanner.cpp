@@ -27,7 +27,7 @@ int VirtualBipedPlanner::Initialize()
     ksat      = 5000;
     satEffectRange = 0.05;
 
-    u1        = 0.01;
+    u1        = 0.05;
     u2        = 0.08;
     w1        = 0.898;
     w2        = 0.9;
@@ -279,7 +279,7 @@ int VirtualBipedPlanner::StateTransition()
 
 int VirtualBipedPlanner::PlanningFootHeight()
 {
-    double tacc = 0.25;
+    double tacc = 0.3;
     double theta = 0;
     double pi = 3.14159265359;
     double acc = pi / tacc / (1 - tacc);
