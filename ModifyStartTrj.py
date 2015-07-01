@@ -26,22 +26,22 @@ for i in range(1, 19):
 print len(time)
 #tplt = time / 1.0
 tplt = numpy.linspace(0, len(time), num=len(time))
-offset = numpy.linspace(120000, 0,  num=len(time))
+offset = numpy.linspace(100000, 0,  num=len(time))
 
 dataArr[:, 13] = dataArr[:, 13] + offset
 dataArr[:, 14] = dataArr[:, 14] + offset
 dataArr[:, 15] = dataArr[:, 15] + offset
 
-plt.plot(tplt, axis[12])
-plt.plot(tplt, axis[13])
-plt.plot(tplt, axis[14])
+#plt.plot(tplt, axis[12])
+#plt.plot(tplt, axis[13])
+#plt.plot(tplt, axis[14])
 
-plt.plot(tplt, dataArr[:,13])
-plt.plot(tplt, dataArr[:,14])
-plt.plot(tplt, dataArr[:,15])
+#plt.plot(tplt, dataArr[:,13])
+#plt.plot(tplt, dataArr[:,14])
+#plt.plot(tplt, dataArr[:,15])
 
-plt.grid(True)
-plt.show()
+#plt.grid(True)
+#plt.show()
 file = open('./resource/gait/new_start.txt', 'w')
 
 for i in range(len(time)):

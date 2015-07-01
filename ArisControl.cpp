@@ -519,7 +519,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
 static int HEXBOT_HOME_OFFSETS_RESOLVER[18] =
 {
     -15849882 + 349000,	 -16354509 + 349000,	 -16354509 + 349000,
-    -15849882 + 349000 + 120000,	 -16354509 + 349000 + 120000,	 -16354509 + 349000 + 120000, // 5 
+    -15849882 + 349000 + 100000,	 -16354509 + 349000 + 100000,	 -16354509 + 349000 + 100000, // 5 
     -15849882 + 349000,	 -16354509 + 349000,	 -16354509 + 349000,
     -16354509 + 349000,	 -15849882 + 349000,	 -16354509 + 349000,
     -15849882 + 349000,	 -16354509 + 349000,	 -16354509 + 349000,
@@ -685,7 +685,7 @@ int main(int argc, char** argv)
 
     initParam.motorNum      = 18;
     initParam.homeHighSpeed = 280000;
-    initParam.homeLowSpeed  = 40000;
+    initParam.homeLowSpeed  = 80000;
     initParam.homeMode      = -1;
 
     ////necessary steps
