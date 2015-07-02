@@ -502,10 +502,10 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
         //givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
         if (fabs(givenForce[i]) < 10.0)
             givenForce[i] = 0;
-        if (givenForce[i] > 100.0)
-            givenForce[i] = 100.0;
-        if (givenForce[i] < -100.0)
-            givenForce[i] = -100.0;
+        if (givenForce[i] > 180.0)
+            givenForce[i] = 180.0;
+        if (givenForce[i] < -180.0)
+            givenForce[i] = -180.0;
     }
 
    

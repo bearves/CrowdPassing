@@ -20,9 +20,9 @@ int VirtualBipedPlanner::Initialize()
 
     halfperiod= 1.6;      // second
     alpha     = 0.1;       
-    beta      = 2.8;
+    beta      = 3.2;
     stepheight= 0.045;    // meter
-    kpsw      = 64;  
+    kpsw      = 72;  
     kdsw      = 20;  
     ksat      = 5000;
     satEffectRange = 0.05;

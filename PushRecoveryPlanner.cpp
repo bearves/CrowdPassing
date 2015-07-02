@@ -84,7 +84,11 @@ int PushRecoveryPlanner::GenerateJointTrajectory(
     virtualPlanner.DoIteration(timeNow, externalForce, legGroupPosition, legGroupPositionDot);
     this->CalculateEachLegPosition();
 
+    //initialBodyPosition = { 0, 1/2, 0, 0, 0, 0};
+    //s_ep2pm(initialBodyPosition, pm, "321");
+    //s_pm2ep(pm, initialBodyPosition, "313");
     robot.SetPee(feetPosition, initialBodyPosition, "G");
+    
     robot.GetPin(jointLength);
 
     return 0;
