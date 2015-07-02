@@ -493,9 +493,9 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
         ////givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
     /*}*/
 
-    givenForce[0] = machineData.forceData[0].forceValues[1] / 1000.0;
-    givenForce[1] = machineData.forceData[0].forceValues[0] / 1000.0;
-    givenForce[2] = machineData.forceData[0].forceValues[2] / 1000.0;
+    givenForce[0] = 2 * machineData.forceData[0].forceValues[1] / 1000.0;
+    givenForce[1] = 2 * machineData.forceData[0].forceValues[0] / 1000.0;
+    givenForce[2] = 2 * machineData.forceData[0].forceValues[2] / 1000.0;
  
     for(int i = 0; i < 3; i++)
     {
