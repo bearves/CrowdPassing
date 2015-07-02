@@ -431,7 +431,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
         case ONLINEGAIT:
             // TODO: add online trj code here
 
-            gait.onlinePlanner.Initialize();
+            gait.onlinePlanner.Initialize(1);
             if(gait.m_gaitState[MapAbsToPhy[0]]==GAIT_STOP)
             {
                 for(int i=0;i<18;i++)

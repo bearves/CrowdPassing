@@ -29,35 +29,48 @@ PushRecoveryPlanner::~PushRecoveryPlanner(void)
 {
 }
 
-int PushRecoveryPlanner::Initialize()
+int PushRecoveryPlanner::Initialize(int gaitMod)
 {
-    if ( olgaitState == OGS_OFFLINE ){
+    if ( olgaitState == OGS_OFFLINE && gaitMod == 1){
         virtualPlanner.Initialize();
-        olgaitState = OGS_ONLINE;
+        olgaitState = OGS_ONLINE_DRAG;
+    }
+    else if ( olgaitState == OGS_OFFLINE && gaitMod == 2)
+    {
+        retreatGaitPlanner.Initialize();
+        olgaitState = OGS_ONLINE_RETREAT;
     }
     return 0;
 }
 
 int PushRecoveryPlanner::Start(double timeNow)
 {
-    if ( olgaitState == OGS_ONLINE ){
+    if ( olgaitState == OGS_ONLINE_DRAG ){
         virtualPlanner.Start(timeNow);
+    }
+    else if (olgaitState == OGS_ONLINE_RETREAT)
+    {
+        retreatGaitPlanner.Start(timeNow);
     }
     return 0;
 }
 
 int PushRecoveryPlanner::Stop(double timeNow)
 {
-    if ( olgaitState == OGS_ONLINE )
+    if ( olgaitState == OGS_ONLINE_DRAG )
     {
         virtualPlanner.RequireStop(timeNow);
+    }
+    else if ( olgaitState == OGS_ONLINE_RETREAT)
+    {
+        retreatGaitPlanner.RequireStop(timeNow);
     }
     return 0;
 }
 
 int PushRecoveryPlanner::Offline()
 {
-    if ( olgaitState == OGS_ONLINE )
+    if ( olgaitState == OGS_ONLINE_DRAG )
     {
         olgaitState = OGS_OFFLINE;
     }
@@ -80,17 +93,26 @@ int PushRecoveryPlanner::GenerateJointTrajectory(
 {
     if ( olgaitState == OGS_OFFLINE)
         return -1; // This function should not be called when olgaitState == OGS_OFFLINE
-
-    virtualPlanner.DoIteration(timeNow, externalForce, legGroupPosition, legGroupPositionDot);
-    this->CalculateEachLegPosition();
-
-    //initialBodyPosition = { 0, 1/2, 0, 0, 0, 0};
-    //s_ep2pm(initialBodyPosition, pm, "321");
-    //s_pm2ep(pm, initialBodyPosition, "313");
-    robot.SetPee(feetPosition, initialBodyPosition, "G");
     
-    robot.GetPin(jointLength);
+    if ( olgaitState == OGS_ONLINE_DRAG)
+    {
+        virtualPlanner.DoIteration(timeNow, externalForce, legGroupPosition, legGroupPositionDot);
+        this->CalculateEachLegPosition();
 
+        //initialBodyPosition = { 0, 1/2, 0, 0, 0, 0};
+        //s_ep2pm(initialBodyPosition, pm, "321");
+        //s_pm2ep(pm, initialBodyPosition, "313");
+        robot.SetPee(feetPosition, initialBodyPosition, "G");
+        robot.GetPin(jointLength);
+    }
+
+    else if (olgaitState == OGS_ONLINE_RETREAT)
+    {
+        retreatGaitPlanner.DoPlanning(timeNow, externalForce, legGroupPosition, bodyPosition);
+        
+        robot.SetPee(feetPosition, bodyPosition, "G");
+        robot.GetPin(jointLength);
+    }
     return 0;
 }
 

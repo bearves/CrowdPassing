@@ -3,6 +3,7 @@
 
 #include "Hexapod_Robot.h"
 #include "VirtualBipedPlanner.h"
+#include "RetreatGait.h"
 
 // The planner to generate the joint trajectory for push recovery
 class PushRecoveryPlanner
@@ -10,15 +11,16 @@ class PushRecoveryPlanner
 public:
     enum ONLINE_GAIT_STATE
     {
-        OGS_ONLINE   = 1,
-        OGS_RETURNING= 2,
-        OGS_OFFLINE  = 5
+        OGS_ONLINE_DRAG    = 1,
+        OGS_ONLINE_RETREAT = 2,
+        OGS_RETURNING      = 3,
+        OGS_OFFLINE        = 5
     };
     PushRecoveryPlanner(void);
     ~PushRecoveryPlanner(void);
 
     // Intialize the planner, should be called when receiving the GAIT_INIT message
-    int Initialize();
+    int Initialize(int gaitMod);
     // Start the planner
     int Start(double timeNow);
     // Stop the planner, it cannot be start again
@@ -41,6 +43,8 @@ private:
 
     Hexapod_Robot::ROBOT robot;
     VirtualBipedPlanner virtualPlanner;
+    RetreatGait retreatGaitPlanner; 
+
     ONLINE_GAIT_STATE olgaitState;
 
     double initialFeetPosition[18];

@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     double screwLength[18];
     double legTipPositions[18];
     PushRecoveryPlanner planner;
-    planner.Initialize();
+    planner.Initialize(1);
 
     planner.GetInitialJointLength(screwLength);
 
