@@ -3,7 +3,7 @@
 using namespace std;
 
 const double RetreatGait::timeOfAction[] = 
-     { 0.02, 3.6, 3.6, 5, 7, 7, 7, 7};
+     { 0.02, 3.401, 3.401, 3.5, 5, 5, 5, 5};
 
 const double RetreatGait::timeInterval = 0.001;
 

@@ -47,9 +47,9 @@ public:
 private:
     // State variables
     static const double timeOfAction[8];
-    static const int FORWARD_GAIT_LENGTH = 3500; 
-    static const int SIDE_WEBB_GAIT_LENGTH = 6000;
-    static const int BODY_DOWN_GAIT_LENGTH = 4000;
+    static const int FORWARD_GAIT_LENGTH = 3401; 
+    static const int SIDE_WEBB_GAIT_LENGTH = 5000;
+    static const int BODY_DOWN_GAIT_LENGTH = 3500;
     static const double timeInterval;
 
     RETREAT_GAIT_STATE gaitState;
