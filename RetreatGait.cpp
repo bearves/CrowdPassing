@@ -225,7 +225,7 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
                 isActionFinished = true;
             }
             break;
-        case BODY_RETREAT_TO_LEFT:
+        case BODY_RETREAT_TO_RIGHT:
             index = innerCounter - timeCountWhenEnterAction;
 
             //cout << "Action: left " << index <<  endl;
@@ -242,7 +242,7 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
                 isActionFinished = true;
             }
             break;
-        case BODY_RETREAT_TO_RIGHT:
+        case BODY_RETREAT_TO_LEFT:
             index = innerCounter - timeCountWhenEnterAction;
             //cout << "Action: right " << timeWhenEnterAction << endl;
             if (index >= 0 && index < SIDE_WEBB_GAIT_LENGTH)
