@@ -44,12 +44,12 @@ static const double forceForTest[] =
 {
     0,   0,   0,    0, 0, 0,
     90,  0,   0,    0, 0, 0,
-    120, 0,   0,    0, 0, 0,  
+    120, 0,   0,    0, 0, 0,   // Go left side
     260, 0,   0,    0, 0, 0,
     0,   90,  0,    0, 0, 0,
-    0,   120, 0,    0, 0, 0,  
+    0,   120, 0,    0, 0, 0,   // Go front 
     0,   260, 0,    0, 0, 0,
-    0,   0,   -120, 0, 0, 0,
+    0,   0,   -120, 0, 0, 0,   // Go down
     100, 100, 0,    0, 0, 0  
 };
 
@@ -130,7 +130,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
 
     double timeNow = rtCycleCounter * 0.001;
 
-    if (rtCycleCounter % 1000 == 0)
+    if (rtCycleCounter % 200 == 0)
     {
         for( int i = 0; i < 1; i++ )
         {
@@ -140,12 +140,6 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
             rt_printf("Force given: %4.1lf, %4.1lf, %4.1lf\n", givenForce[3], givenForce[4], givenForce[5]);
         }
         
-    }
-    if (rtCycleCounter % 200 == 0){
-        rt_printf("Actual Force: %4.1lf, %4.1lf, %4.1lf\n", 
-                    machineData.forceData[0].forceValues[0]/1000.0,
-                    machineData.forceData[0].forceValues[1]/1000.0,
-                    machineData.forceData[0].forceValues[2]/1000.0);
     }
 
     CommandID=msgRecv.GetMsgID();
@@ -495,15 +489,21 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
             break;
     }
 
-    for(int i = 0; i < 6; i++)
-    {
-        givenForce[i] = forceForTest[forceSelectionFlag * 6 + i];
-    }
+    //for(int i = 0; i < 6; i++)
+    //{
+        //givenForce[i] = forceForTest[forceSelectionFlag * 6 + i];
+    //}
 
-    //givenForce[0] = 2 * machineData.forceData[0].forceValues[1] / 1000.0;
-    //givenForce[1] = 2 * machineData.forceData[0].forceValues[0] / 1000.0;
-    //givenForce[2] = 2 * machineData.forceData[0].forceValues[2] / 1000.0;
- 
+    // map sensed force to model
+    givenForce[0] = 2 * machineData.forceData[0].forceValues[1] / 1000.0;
+    givenForce[1] = 2 * machineData.forceData[0].forceValues[0] / 1000.0;
+    givenForce[2] = 2 * machineData.forceData[0].forceValues[2] / 1000.0;
+    
+    // map sensed torque to model
+    givenForce[3] = 2 * machineData.forceData[0].forceValues[3] / 1000.0;
+    givenForce[4] = 2 * machineData.forceData[0].forceValues[4] / 1000.0;
+    givenForce[5] = 2 * machineData.forceData[0].forceValues[5] / 1000.0;
+
     for(int i = 0; i < 3; i++)
     {
         //givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];

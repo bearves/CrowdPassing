@@ -148,31 +148,31 @@ bool RetreatGait::DetermineAction(double *fext, RetreatGait::ACTION& actionToDo)
 {
     actionToDo = NO_ACTION;
     // force mainly towards front direction
-    if (fext[1] > 100 && fabs(fext[2]) < 30) 
+    if (fext[1] > 160 && fabs(fext[2]) < 30 && fabs(fext[0]) < 40)
     {
         actionToDo = GO_FORWARD;
         return true;
     } 
     // force mainly towards back direction
-    else if (fext[1] < -100)
+    else if (fext[1] < -160 && fabs(fext[2]) < 30 && fabs(fext[0]) < 40)
     {
         actionToDo = GO_BACKWARD;
         return true;
     }
     // force mainly downwards, no too much torque
-    else if (fext[2] < -100 && 
+    else if (fext[2] < -160 && 
             fabs(fext[3]) < 10 && 
             fabs(fext[4]) < 10)
     {
         actionToDo = BODY_DOWN;
         return true;
     } 
-    else if (fext[0] > 100)
+    else if (fext[0] > 160 && fabs(fext[1]) < 40)
     {
         actionToDo = BODY_RETREAT_TO_RIGHT;
         return true;
     }
-    else if (fext[0] < -100)
+    else if (fext[0] < -160 && fabs(fext[1]) < 40)
     {
        actionToDo = BODY_RETREAT_TO_LEFT;
        return true;
