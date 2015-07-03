@@ -6,7 +6,6 @@
 #include <iostream>
 #include <string.h>
 #include <errno.h>
-#include "rtdk.h"
 
 class RetreatGait
 {
@@ -58,8 +57,9 @@ private:
     int innerCounter;
 
     bool isStopRequired;
+    bool isActionFinished;
 
-    int timeWhenEnterAction;
+    int timeCountWhenEnterAction;
 
     double initialBodyPosition[6];
     double currentBodyPosition[6];

@@ -9,11 +9,12 @@ int main(int argc, char** argv)
 {
     using namespace std;
     ofstream trjfile("TrjFile.txt");
-    double fext[3]; 
+    double fext[6]; 
     double screwLength[18];
     double legTipPositions[18];
     PushRecoveryPlanner planner;
-    planner.Initialize(1);
+    planner.LoadData();
+    planner.Initialize(2);
 
     planner.GetInitialJointLength(screwLength);
 
@@ -23,7 +24,7 @@ int main(int argc, char** argv)
     cout << endl;
 
     cout << "--------------------------------------"<<endl;
-    for ( int step = 0; step < 30000; step++)
+    for ( int step = 0; step < 18000; step++)
     {
         double timeNow = step*0.001;
 
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
         {
             planner.Start(timeNow);
         }
-        if ( step == 20000 )
+        if ( step == 14000 )
         {
             planner.Stop(timeNow);
         }
@@ -55,14 +56,28 @@ int main(int argc, char** argv)
 
 void ApplyForce( double timeNow, double* fxt )
 {
-    if (timeNow > 0.6 && timeNow < 14)
+    if (timeNow > 0.6 && timeNow < 0.62)
     {
-        fxt[0] = 90;
-        fxt[1] = 90;
+        fxt[0] = -120;
+        fxt[1] = 0;
+        fxt[2] = 0;
+    }
+    else if (timeNow > 7.1 && timeNow < 7.12)
+    {
+        fxt[0] = 0;
+        fxt[1] = 0;
+        fxt[2] = -200;
+    }
+    else if (timeNow > 12.1 && timeNow < 12.8)
+    {
+        fxt[0] = 0;
+        fxt[1] = -120;
+        fxt[2] = 0;
     }
     else
     {
         fxt[0] = 0;
         fxt[1] = 0;
+        fxt[2] = 0;
     }
 }

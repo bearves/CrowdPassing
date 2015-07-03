@@ -24,7 +24,7 @@ set(LIBRARY_OUTPUT_PATH lib)
 
 # set include and lib folders
 if(UNIX)
-    set(ARIS_SOURCE_LOCATION "/home/hex/Aris_with_force")
+    set(ARIS_SOURCE_LOCATION "/home/sun/Projects/Aris")
     include_directories("/usr/lapack/include")
     include_directories(${ARIS_SOURCE_LOCATION}/src/Aris_Control)
     include_directories(${ARIS_SOURCE_LOCATION}/src/Aris_Core)
@@ -58,7 +58,7 @@ set(ROBOTS_LINK_LIBS  HexapodIII)
 set(SOURCE_FILES PRT.cpp VirtualBipedPlanner.cpp PushRecoveryPlanner.cpp RetreatGait.cpp)
 PREPEND(FULL_SRC PRT ${SOURCE_FILES})
 add_executable(PRT ${SOURCE_FILES})
-target_link_libraries(PRT ${ROBOTS_LINK_LIBS} ${ARIS_LINK_LIBS} ${LAPACK_LINK_LIBS} ${ETHERLAB_LINK_LIBS} ${XENOMAI_LINK_LIBS} ${SYSTEM_LINK_LIBS})
+target_link_libraries(PRT ${ROBOTS_LINK_LIBS} ${ARIS_NORT_LINK_LIBS} ${LAPACK_LINK_LIBS} ${SYSTEM_LINK_LIBS})
 
 # build another test
 set(SOURCE_FILES main.cpp VirtualBipedPlanner.cpp PushRecoveryPlanner.cpp RetreatGait.cpp)

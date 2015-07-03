@@ -9,6 +9,7 @@ const double RetreatGait::timeInterval = 0.001;
 
 RetreatGait::RetreatGait()
 {
+    innerCounter = 0;
 }
 
 RetreatGait::~RetreatGait()
@@ -25,11 +26,13 @@ int RetreatGait::Initialize()
         currentFeetPosition[i] = 0; 
     }
 
-    timeWhenEnterAction = 0;
+    innerCounter = 0;
+    timeCountWhenEnterAction = 0;    
 
     currentAction = NO_ACTION;
     gaitState = RGS_READY;
     isStopRequired = false;
+    isActionFinished = true;
     return 0;
 }
 
@@ -85,7 +88,7 @@ int RetreatGait::Start(double timeNow)
         gaitState = RGS_WAITING;
         isStopRequired = false;
         currentAction = NO_ACTION;
-        timeWhenEnterAction = timeNow;
+        timeCountWhenEnterAction = innerCounter;
     }
     return 0;
 }
@@ -103,6 +106,7 @@ int RetreatGait::DoPlanning(
         double *feetPos,/*out*/  
         double *bodyPos/*out*/)
 {
+    innerCounter++;
     switch (gaitState)
     {
         case RGS_READY:
@@ -117,12 +121,13 @@ int RetreatGait::DoPlanning(
             if (this->DetermineAction(fext, currentAction))
             {
                 gaitState = RGS_INMOTION;
-                timeWhenEnterAction = timeNow;
+                timeCountWhenEnterAction = innerCounter;
+                isActionFinished = false;
             }
             break;
         case RGS_INMOTION:
             this->ActionPlanning(timeNow, fext);
-            if (timeNow > timeWhenEnterAction + timeOfAction[currentAction])
+            if (isActionFinished)
             {
                 gaitState = RGS_WAITING;
                 currentAction = NO_ACTION;
@@ -135,10 +140,6 @@ int RetreatGait::DoPlanning(
     { // Stay at the current position
         feetPos[i]  = currentFeetPosition[i];
         bodyPos[i] = currentBodyPosition[i];
-    }
-    if (fabs(fmod(timeNow, 0.1)) < 1.1e-3)
-    {
-        rt_printf("State: %d   Action: %d\n", gaitState, currentAction);
     }
     return 0;
 }
@@ -188,7 +189,8 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
         case NO_ACTION:
             break;
         case GO_FORWARD:
-            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            index = innerCounter - timeCountWhenEnterAction;
+            //cout << "Action: forward " << index <<  endl;
             if (index >= 0 && index < FORWARD_GAIT_LENGTH)
             {
                 for (int i = 0; i < 6; i++)
@@ -197,9 +199,14 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
                     currentFeetPosition[i] = forwardGaitData[index][6 + i];
                 }
             }
+            else
+            {
+                isActionFinished = true;
+            }
             break;
         case GO_BACKWARD:
-            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            index = innerCounter - timeCountWhenEnterAction;
+            //cout << "Action: backword " << index <<  endl;
             if (index >= 0 && index < FORWARD_GAIT_LENGTH)
             {
                 for (int i = 0; i < 6; i++)
@@ -213,9 +220,15 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
                 currentFeetPosition[2] = -currentFeetPosition[2];
                 currentFeetPosition[5] = -currentFeetPosition[5];
             }
+            else
+            {
+                isActionFinished = true;
+            }
             break;
         case BODY_RETREAT_TO_LEFT:
-            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            index = innerCounter - timeCountWhenEnterAction;
+
+            //cout << "Action: left " << index <<  endl;
             if (index >= 0 && index < SIDE_WEBB_GAIT_LENGTH)
             {
                 for (int i = 0; i < 6; i++)
@@ -224,9 +237,14 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
                     currentFeetPosition[i] = sideWebbGaitData[index][6 + i];
                 }
             }
+            else
+            {
+                isActionFinished = true;
+            }
             break;
         case BODY_RETREAT_TO_RIGHT:
-            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            index = innerCounter - timeCountWhenEnterAction;
+            //cout << "Action: right " << timeWhenEnterAction << endl;
             if (index >= 0 && index < SIDE_WEBB_GAIT_LENGTH)
             {
                 for (int i = 0; i < 6; i++)
@@ -240,6 +258,27 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
                 // reverse x direction of legs 
                 currentFeetPosition[0] = -currentFeetPosition[0];
                 currentFeetPosition[3] = -currentFeetPosition[3];
+            }
+            else
+            {
+                isActionFinished = true;
+            }
+            break;
+        case BODY_DOWN:
+            index = innerCounter - timeCountWhenEnterAction;
+
+            //cout << "Action: bodydown " << index <<  endl;
+            if (index >= 0 && index < BODY_DOWN_GAIT_LENGTH)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    currentBodyPosition[i] = bodyDownData[index][i];
+                    currentFeetPosition[i] = bodyDownData[index][6 + i];
+                }
+            }
+            else
+            {
+                isActionFinished = true;
             }
             break;
         default:
