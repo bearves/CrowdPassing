@@ -388,6 +388,9 @@ int CGait::InitGait(Aris::RT_CONTROL::CSysInitParameters& param)
 
     fin.close();
 
+    if (onlinePlanner.LoadData() != 0)
+        goto OPEN_FILE_FAIL;
+
     cout << "All files sucessfully read" << endl;
     return 0;
 
@@ -911,7 +914,8 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
 
     }
 
-    if (onlinePlanner.GetCurrentState() == PushRecoveryPlanner::OGS_ONLINE_DRAG)
+    if (onlinePlanner.GetCurrentState() == PushRecoveryPlanner::OGS_ONLINE_DRAG ||
+        onlinePlanner.GetCurrentState() == PushRecoveryPlanner::OGS_ONLINE_RETREAT)
     {
         onlinePlanner.GenerateJointTrajectory( timeNow, givenForce, m_screwLength);
         CalculateActualMotorCounts(m_screwLength, m_commandMotorCounts);

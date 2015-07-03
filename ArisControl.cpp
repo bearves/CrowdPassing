@@ -42,18 +42,18 @@ static const char *GS_STRING[] =
 
 static const double forceForTest[] =
 {
-    0,   0,   0,
-    90,  0,   0,
-    120, 0,   0,
-    260, 0,   0,
-    0,   90,  0,
-    0,   120, 0,
-    0,   260, 0,
-    60,  60,  0,
-    100, 100, 0
+    0,   0,   0,    0, 0, 0,
+    90,  0,   0,    0, 0, 0,
+    120, 0,   0,    0, 0, 0,
+    260, 0,   0,    0, 0, 0,
+    0,   90,  0,    0, 0, 0,
+    0,   120, 0,    0, 0, 0,
+    0,   260, 0,    0, 0, 0,
+    0,   0,   -100, 0, 0, 0,
+    100, 100, 0,    0, 0, 0
 };
 
-double givenForce[] = {0, 0, 0};
+double givenForce[] = {0, 0, 0, 0, 0, 0};
 
 static int forceSelectionFlag = 0;
 
@@ -87,7 +87,8 @@ enum MACHINE_CMD
     SET_FORCE_6   = 1031,
     SET_FORCE_7   = 1032,
     SET_FORCE_8   = 1033,
-    CLEAR_FORCE   = 1034
+    CLEAR_FORCE   = 1034,
+    ONLINEGAIT2   = 1035
 };
 
 enum REPLY_MSG_ID
@@ -136,6 +137,7 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
             rt_printf("No. %d GS. %d MS. %d POS. %d \n",
                  i, gaitcmd[i], machineData.motorsStates[i], machineData.feedbackData[i].Position);
             rt_printf("Force given: %4.1lf, %4.1lf, %4.1lf\n", givenForce[0], givenForce[1], givenForce[2]);
+            rt_printf("Force given: %4.1lf, %4.1lf, %4.1lf\n", givenForce[3], givenForce[4], givenForce[5]);
         }
         
     }
@@ -145,14 +147,6 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
                     machineData.forceData[0].forceValues[1]/1000.0,
                     machineData.forceData[0].forceValues[2]/1000.0);
     }
-
-    //if (rtCycleCounter % 100 == 0)
-    //{
-        //msgSend.SetMsgID(DATA_REPORT);
-        //msgSend.Copy((const void*)&machineData, sizeof(machineData));
-        
-        //controlSystem.RT_PostMsg(msgSend);
-    //}
 
     CommandID=msgRecv.GetMsgID();
     switch(CommandID)
@@ -443,6 +437,19 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
             }
             break;
 
+        case ONLINEGAIT2:
+            gait.onlinePlanner.Initialize(2);
+            if(gait.m_gaitState[MapAbsToPhy[0]]==GAIT_STOP)
+            {
+                for(int i=0;i<18;i++)
+                {
+                    machineData.motorsModes[i]=EOperationMode::OM_CYCLICVEL;
+                    gaitcmd[MapAbsToPhy[i]]=EGAIT::GAIT_ONLINE;
+                    machineData.motorsCommands[i]=EMCMD_RUNNING;
+                }
+            }
+            break;
+
         case ONLINEBEGIN:
             gait.onlinePlanner.Start(timeNow);
             break;
@@ -488,14 +495,14 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
             break;
     }
 
-    /*for(int i = 0; i < 3; i++)*/
-    //{
-        ////givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
-    /*}*/
+    for(int i = 0; i < 6; i++)
+    {
+        givenForce[i] = forceForTest[forceSelectionFlag * 6 + i];
+    }
 
-    givenForce[0] = 2 * machineData.forceData[0].forceValues[1] / 1000.0;
-    givenForce[1] = 2 * machineData.forceData[0].forceValues[0] / 1000.0;
-    givenForce[2] = 2 * machineData.forceData[0].forceValues[2] / 1000.0;
+    //givenForce[0] = 2 * machineData.forceData[0].forceValues[1] / 1000.0;
+    //givenForce[1] = 2 * machineData.forceData[0].forceValues[0] / 1000.0;
+    //givenForce[2] = 2 * machineData.forceData[0].forceValues[2] / 1000.0;
  
     for(int i = 0; i < 3; i++)
     {
@@ -508,7 +515,6 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
             givenForce[i] = -180.0;
     }
 
-   
     gait.RunGait(timeNow, gaitcmd,machineData, givenForce);
 
     return 0;
@@ -646,6 +652,10 @@ int OnGetControlCommand(Aris::Core::MSG &msg)
             break;
         case 28:
             data.SetMsgID(CLEAR_FORCE);
+            controlSystem.NRT_PostMsg(data);
+            break;
+        case 29:
+            data.SetMsgID(ONLINEGAIT2);
             controlSystem.NRT_PostMsg(data);
             break;
 

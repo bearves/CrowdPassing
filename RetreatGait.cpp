@@ -5,6 +5,8 @@ using namespace std;
 const double RetreatGait::timeOfAction[] = 
      { 0.02, 3.6, 3.6, 5, 7, 7, 7, 7};
 
+const double RetreatGait::timeInterval = 0.001;
+
 RetreatGait::RetreatGait()
 {
 }
@@ -31,6 +33,51 @@ int RetreatGait::Initialize()
     return 0;
 }
 
+int RetreatGait::LoadData()
+{
+    int flag;
+    /* gait forward */
+    flag = LoadEachData("../../resource/gait/forward_body_feet.txt", FORWARD_GAIT_LENGTH, forwardGaitData);
+    if (flag != 0)
+        goto OPEN_FILE_FAIL;
+
+    flag = LoadEachData("../../resource/gait/side_body_feet.txt", SIDE_WEBB_GAIT_LENGTH,  sideWebbGaitData);
+    if (flag != 0)
+        goto OPEN_FILE_FAIL;
+
+    flag = LoadEachData("../../resource/gait/body_down_body_feet.txt", BODY_DOWN_GAIT_LENGTH,  bodyDownData);
+    if (flag != 0)
+        goto OPEN_FILE_FAIL;
+
+    return 0;
+
+OPEN_FILE_FAIL:
+    cerr << "Retreat Gait: Open file error: " << strerror(flag) << endl;
+    return errno;
+}
+
+int RetreatGait::LoadEachData(const char* dataPath, int dataLength, double (* dataPlace)[12])
+{
+    std::fstream fin;
+    double temp;
+    /* gait forward */
+    fin.open(dataPath);
+    if(fin.fail())
+        return errno;
+
+    for(int i = 0; i < dataLength; i++)
+    {
+        for(int j = 0; j < 12 ; j++)
+        {
+            fin>>temp;
+            dataPlace[i][j] = temp;
+        }
+
+    }
+    fin.close();
+    return 0;
+}
+
 int RetreatGait::Start(double timeNow)
 {
     if (gaitState == RGS_READY)
@@ -49,33 +96,18 @@ int RetreatGait::RequireStop(double timeNow)
     return 0;
 }
 
+// The gait generator
 int RetreatGait::DoPlanning( 
         double timeNow, /*in*/
         double *fext,   /*in*/
         double *feetPos,/*out*/  
         double *bodyPos/*out*/)
 {
-    
-    for (int i = 0; i < 6; i++)
-    { // Stay at the current position
-        feetPos[i]  = currentFeetPosition[i];
-        bodyPos[i] = currentBodyPosition[i];
-    }
     switch (gaitState)
     {
         case RGS_READY:
-            for (int i = 0; i < 6; i++)
-            { // Stay at the initial position
-                feetPos[i] = initialFeetPosition[i];
-                bodyPos[i] = initialBodyPosition[i];
-            }
             break;
         case RGS_WAITING:
-            for (int i = 0; i < 6; i++)
-            { // Stay at the current position
-                feetPos[i]  = currentFeetPosition[i];
-                bodyPos[i] = currentBodyPosition[i];
-            }
             // if a stop is required, quit to STOPPED
             if (isStopRequired)
             {
@@ -89,7 +121,7 @@ int RetreatGait::DoPlanning(
             }
             break;
         case RGS_INMOTION:
-            this->ActionPlanning(timeNow, fext, feetPos, bodyPos);
+            this->ActionPlanning(timeNow, fext);
             if (timeNow > timeWhenEnterAction + timeOfAction[currentAction])
             {
                 gaitState = RGS_WAITING;
@@ -97,14 +129,14 @@ int RetreatGait::DoPlanning(
             }
             break;
         case RGS_STOPPED:
-            for (int i = 0; i < 6; i++)
-            { // Stay at the current position
-                feetPos[i]  = currentFeetPosition[i];
-                bodyPos[i] = currentBodyPosition[i];
-            }
             break;
     }
-    if (fabs(fmod(timeNow, 0.1)) < 2e-3)
+    for (int i = 0; i < 6; i++)
+    { // Stay at the current position
+        feetPos[i]  = currentFeetPosition[i];
+        bodyPos[i] = currentBodyPosition[i];
+    }
+    if (fabs(fmod(timeNow, 0.1)) < 1.1e-3)
     {
         rt_printf("State: %d   Action: %d\n", gaitState, currentAction);
     }
@@ -148,12 +180,70 @@ bool RetreatGait::DetermineAction(double *fext, RetreatGait::ACTION& actionToDo)
 };
 
 
-void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext, /*OUT*/double *feetPos, /*OUT*/double *bodyPos)
+void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
 {
-    for (int i = 0; i < 6; i++)
-    { // Stay at the current position
-        feetPos[i]  = currentFeetPosition[i];
-        bodyPos[i] = currentBodyPosition[i];
+    int index = 0;
+    switch (currentAction)
+    {
+        case NO_ACTION:
+            break;
+        case GO_FORWARD:
+            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            if (index >= 0 && index < FORWARD_GAIT_LENGTH)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    currentBodyPosition[i] = forwardGaitData[index][i];
+                    currentFeetPosition[i] = forwardGaitData[index][6 + i];
+                }
+            }
+            break;
+        case GO_BACKWARD:
+            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            if (index >= 0 && index < FORWARD_GAIT_LENGTH)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    currentBodyPosition[i] = forwardGaitData[index][i];
+                    currentFeetPosition[i] = forwardGaitData[index][6 + i];
+                }
+                // reverse z direction (front to back)
+                currentBodyPosition[5] = -currentBodyPosition[5]; 
+                // reverse x direction of legs
+                currentFeetPosition[2] = -currentFeetPosition[2];
+                currentFeetPosition[5] = -currentFeetPosition[5];
+            }
+            break;
+        case BODY_RETREAT_TO_LEFT:
+            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            if (index >= 0 && index < SIDE_WEBB_GAIT_LENGTH)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    currentBodyPosition[i] = sideWebbGaitData[index][i];
+                    currentFeetPosition[i] = sideWebbGaitData[index][6 + i];
+                }
+            }
+            break;
+        case BODY_RETREAT_TO_RIGHT:
+            index = (timeNow - timeWhenEnterAction) / timeInterval;
+            if (index >= 0 && index < SIDE_WEBB_GAIT_LENGTH)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    currentBodyPosition[i] = sideWebbGaitData[index][i];
+                    currentFeetPosition[i] = sideWebbGaitData[index][6 + i];
+                }
+                // reverse x direction (left to right)
+                currentBodyPosition[3] = -currentBodyPosition[3]; 
+                currentBodyPosition[0] = -currentBodyPosition[0];  // reverse the roll angle
+                // reverse x direction of legs 
+                currentFeetPosition[0] = -currentFeetPosition[0];
+                currentFeetPosition[3] = -currentFeetPosition[3];
+            }
+            break;
+        default:
+            break; 
     }
 }
 

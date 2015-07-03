@@ -29,6 +29,11 @@ PushRecoveryPlanner::~PushRecoveryPlanner(void)
 {
 }
 
+int PushRecoveryPlanner::LoadData()
+{
+    return retreatGaitPlanner.LoadData();
+}
+
 int PushRecoveryPlanner::Initialize(int gaitMod)
 {
     if ( olgaitState == OGS_OFFLINE && gaitMod == 1){
@@ -109,7 +114,7 @@ int PushRecoveryPlanner::GenerateJointTrajectory(
     else if (olgaitState == OGS_ONLINE_RETREAT)
     {
         retreatGaitPlanner.DoPlanning(timeNow, externalForce, legGroupPosition, bodyPosition);
-        
+        this->CalculateEachLegPosition();
         robot.SetPee(feetPosition, bodyPosition, "G");
         robot.GetPin(jointLength);
     }

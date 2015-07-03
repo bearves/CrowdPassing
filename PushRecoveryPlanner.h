@@ -19,6 +19,8 @@ public:
     PushRecoveryPlanner(void);
     ~PushRecoveryPlanner(void);
 
+    // Load the trj data of sub planners
+    int LoadData();
     // Intialize the planner, should be called when receiving the GAIT_INIT message
     int Initialize(int gaitMod);
     // Start the planner

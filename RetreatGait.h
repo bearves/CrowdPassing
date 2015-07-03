@@ -2,6 +2,10 @@
 #define RETREAT_GAIT_H
 
 #include <cmath>
+#include <fstream>
+#include <iostream>
+#include <string.h>
+#include <errno.h>
 #include "rtdk.h"
 
 class RetreatGait
@@ -32,6 +36,7 @@ public:
     ~RetreatGait();
 
     int Initialize();
+    int LoadData();
     int Start(double timeNow);
     int RequireStop(double timeNow);
     int DoPlanning(/*IN*/double timeNow, /*IN*/double * fext, /*OUT*/double *feetPos, /*OUT*/double *bodyPos);
@@ -42,21 +47,32 @@ public:
 private:
     // State variables
     static const double timeOfAction[8];
+    static const int FORWARD_GAIT_LENGTH = 3500; 
+    static const int SIDE_WEBB_GAIT_LENGTH = 6000;
+    static const int BODY_DOWN_GAIT_LENGTH = 4000;
+    static const double timeInterval;
 
     RETREAT_GAIT_STATE gaitState;
     ACTION currentAction; 
 
+    int innerCounter;
+
     bool isStopRequired;
 
-    double timeWhenEnterAction;
+    int timeWhenEnterAction;
 
     double initialBodyPosition[6];
     double currentBodyPosition[6];
     double initialFeetPosition[6]; // three legs as a group
     double currentFeetPosition[6]; // three legs as a group
 
+    double forwardGaitData[FORWARD_GAIT_LENGTH][12];
+    double sideWebbGaitData[SIDE_WEBB_GAIT_LENGTH][12];
+    double bodyDownData[BODY_DOWN_GAIT_LENGTH][12];
+    
+    int LoadEachData(const char* dataPath, int dataLength, double (* dataPlace)[12]);
     bool DetermineAction(double *fext, ACTION& actionToDo);
-    void ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext, /*OUT*/double *feetPos, /*OUT*/double *bodyPos);
+    void ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext);
 };
 
 #endif
