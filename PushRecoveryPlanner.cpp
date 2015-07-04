@@ -139,9 +139,9 @@ int PushRecoveryPlanner::CalculateEachLegPosition()
     {
         for( int j = 0; j < 3; j++)
         {
-            feetPosition[(j * 2 + i) * 3 + 0] += legGroupPosition[i * 3 + 0]; // all X offset
-            feetPosition[(j * 2 + i) * 3 + 1] += legGroupPosition[i * 3 + 1]; // all h offset
-            feetPosition[(j * 2 + i) * 3 + 2] += legGroupPosition[i * 3 + 2]; // all Z offset
+            feetPosition[(j * 2 + i) * 3 + 0] += legGroupPosition[(1 - i) * 3 + 0]; // all X offset
+            feetPosition[(j * 2 + i) * 3 + 1] += legGroupPosition[(1 - i) * 3 + 1]; // all h offset
+            feetPosition[(j * 2 + i) * 3 + 2] += legGroupPosition[(1 - i) * 3 + 2]; // all Z offset
         }
     }
     return 0;
