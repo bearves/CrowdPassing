@@ -73,6 +73,7 @@ private:
     int LoadEachData(const char* dataPath, int dataLength, double (* dataPlace)[12]);
     bool DetermineAction(double *fext, ACTION& actionToDo);
     void ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext);
+    void SwapLegGroup(double *legPosition);
 };
 
 #endif

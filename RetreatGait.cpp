@@ -44,7 +44,7 @@ int RetreatGait::LoadData()
     if (flag != 0)
         goto OPEN_FILE_FAIL;
 
-    flag = LoadEachData("../../resource/gait/side_body_feet.txt", SIDE_WEBB_GAIT_LENGTH,  sideWebbGaitData);
+    flag = LoadEachData("../../resource/gait/side_body_feet_with_step.txt", SIDE_WEBB_GAIT_LENGTH,  sideWebbGaitData);
     if (flag != 0)
         goto OPEN_FILE_FAIL;
 
@@ -258,6 +258,8 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
                 // reverse x direction of legs 
                 currentFeetPosition[0] = -currentFeetPosition[0];
                 currentFeetPosition[3] = -currentFeetPosition[3];
+                // swap leg group1 and group2 
+                SwapLegGroup(currentFeetPosition);
             }
             else
             {
@@ -286,7 +288,16 @@ void RetreatGait::ActionPlanning(/*IN*/double timeNow, /*IN*/double * fext)
     }
 }
 
-
+void RetreatGait::SwapLegGroup(double *legPosition)
+{
+    double temp;
+    for ( int i = 0; i < 3; i++ )
+    {
+        temp = legPosition[i];
+        legPosition[i] = legPosition[i + 3];
+        legPosition[i + 3] = temp;
+    }
+}
 
 
 
