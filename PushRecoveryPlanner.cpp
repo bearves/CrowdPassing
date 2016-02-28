@@ -115,10 +115,10 @@ int PushRecoveryPlanner::GenerateJointTrajectory(
         memcpy(controlDataForLog, (void *)rawForce, sizeof(rawForce)); 
         memcpy(controlDataForLog + sizeof(rawForce), (void *)filteredForce, sizeof(filteredForce)); 
         // Here for calibration, we set force to zero at first
-        for(int i = 0; i < 6; i++)
-        {
-            filteredForce[i] = 0; 
-        }
+        //for(int i = 0; i < 6; i++)
+        //{
+            //filteredForce[i] = 0; 
+        //}
 
         crowdPassingPlanner.DoIteration(timeNow, externalForce, feetPosition);
         robot.SetPee(feetPosition, initialBodyPosition, "G");

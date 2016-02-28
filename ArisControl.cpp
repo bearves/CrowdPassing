@@ -495,14 +495,14 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
     //}
 
     // map sensed force to model
-    givenForce[0] = 2 * machineData.forceData[0].forceValues[1] / 1000.0;
-    givenForce[1] = 2 * machineData.forceData[0].forceValues[0] / 1000.0;
-    givenForce[2] = 2 * machineData.forceData[0].forceValues[2] / 1000.0;
+    givenForce[0] = -1 * machineData.forceData[0].forceValues[1] / 1000.0;
+    givenForce[1] = 1 * machineData.forceData[0].forceValues[0] / 1000.0;
+    givenForce[2] = 1 * machineData.forceData[0].forceValues[2] / 1000.0;
     
     // map sensed torque to model
-    givenForce[3] = 2 * machineData.forceData[0].forceValues[3] / 1000.0;
-    givenForce[4] = 2 * machineData.forceData[0].forceValues[4] / 1000.0;
-    givenForce[5] = 2 * machineData.forceData[0].forceValues[5] / 1000.0;
+    givenForce[3] = 1 * machineData.forceData[0].forceValues[3] / 1000.0;
+    givenForce[4] = 1 * machineData.forceData[0].forceValues[4] / 1000.0;
+    givenForce[5] = 1 * machineData.forceData[0].forceValues[5] / 1000.0;
 
     // saturation
     for(int i = 0; i < 3; i++)

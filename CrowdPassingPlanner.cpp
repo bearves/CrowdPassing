@@ -35,9 +35,9 @@ void CrowdPassingPlanner::InitParams()
 {
     dt         = 0.001;
     mRobot     = 80;
-    IRobot     = 80;
+    IRobot     = 100;
     forceSafe  = 70;
-    vMax       = 0.13;
+    vMax       = 0.11;
     bVirtual   = forceSafe / vMax;
     l0         = 2.5;
     kCorrect   = forceSafe / l0;
@@ -47,7 +47,7 @@ void CrowdPassingPlanner::InitParams()
     heightCOM  = 0.85;
     mActual    = 270;
     heightStep = 0.04;
-    THalfStep  = 1.7;
+    THalfStep  = 1.8;
     tauFoothold = 0.06;
 }
 
