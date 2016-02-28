@@ -55,7 +55,7 @@ set(ARIS_NORT_LINK_LIBS Aris_Plan Aris_DynKer Aris_ExpCal Aris_Core)
 set(ROBOTS_LINK_LIBS  HexapodIII)
 
 # build programs
-set(SOURCE_FILES PRT.cpp CrowdPassingPlanner.cpp VirtualBipedPlanner.cpp PushRecoveryPlanner.cpp RetreatGait.cpp)
+set(SOURCE_FILES PRT.cpp CrowdPassingPlanner.cpp PushRecoveryPlanner.cpp RetreatGait.cpp)
 PREPEND(FULL_SRC PRT ${SOURCE_FILES})
 add_executable(PRT ${SOURCE_FILES})
 target_link_libraries(PRT ${ROBOTS_LINK_LIBS} ${ARIS_NORT_LINK_LIBS} ${LAPACK_LINK_LIBS} ${SYSTEM_LINK_LIBS})
@@ -66,7 +66,7 @@ PREPEND(FULL_SRC PRT ${SOURCE_FILES})
 add_executable(main ${SOURCE_FILES})
 target_link_libraries(main ${ROBOTS_LINK_LIBS} ${ARIS_LINK_LIBS} ${LAPACK_LINK_LIBS} ${SYSTEM_LINK_LIBS})
 
-set(SOURCE_FILES ArisControl.cpp CrowdPassingPlanner.cpp VirtualBipedPlanner.cpp PushRecoveryPlanner.cpp Server.cpp Gait.cpp RetreatGait.cpp)
+set(SOURCE_FILES ArisControl.cpp CrowdPassingPlanner.cpp PushRecoveryPlanner.cpp Server.cpp Gait.cpp RetreatGait.cpp)
 PREPEND(FULL_SRC PRT ${SOURCE_FILES})
 add_executable(ArisControlPRT ${SOURCE_FILES})
 target_link_libraries(ArisControlPRT ${ROBOTS_LINK_LIBS} ${ARIS_LINK_LIBS} ${LAPACK_LINK_LIBS} ${ETHERLAB_LINK_LIBS} ${XENOMAI_LINK_LIBS} ${SYSTEM_LINK_LIBS})
