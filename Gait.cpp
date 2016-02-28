@@ -917,7 +917,7 @@ int CGait::RunGait(double timeNow, EGAIT* p_gait,Aris::RT_CONTROL::CMachineData&
     if (onlinePlanner.GetCurrentState() == PushRecoveryPlanner::OGS_ONLINE_DRAG ||
         onlinePlanner.GetCurrentState() == PushRecoveryPlanner::OGS_ONLINE_RETREAT)
     {
-        onlinePlanner.GenerateJointTrajectory( timeNow, givenForce, m_screwLength);
+        onlinePlanner.GenerateJointTrajectory( timeNow, givenForce, m_screwLength, p_data.controlData);
         CalculateActualMotorCounts(m_screwLength, m_commandMotorCounts);
         for ( int i = 0; i < AXIS_NUMBER; i++)
         {

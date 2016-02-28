@@ -12,6 +12,7 @@ int main(int argc, char** argv)
     double fext[6]; 
     double screwLength[18];
     double legTipPositions[18];
+    char logArea[256];
     PushRecoveryPlanner planner;
     planner.LoadData();
     planner.Initialize(2);
@@ -37,7 +38,7 @@ int main(int argc, char** argv)
             planner.Stop(timeNow);
         }
         ApplyForce(timeNow, fext);
-        planner.GenerateJointTrajectory(timeNow, fext, screwLength);
+        planner.GenerateJointTrajectory(timeNow, fext, screwLength, logArea);
         planner.GetForwardLegPositions(screwLength, legTipPositions);
         trjfile << timeNow << "  ";
         for (auto len : screwLength)

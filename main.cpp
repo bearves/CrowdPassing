@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "VirtualBipedPlanner.h"
+#include "Hexapod_Robot.h"
+#include "CrowdPassingPlanner.h"
+#include "LowpassFilter.h"
 
 using namespace std;
 
@@ -12,24 +14,69 @@ void ApplyForce( double timeNow, double* fxt );
 int main()
 {
     ofstream trj("Trj.txt");
-    VirtualBipedPlanner planner;
-    double fxt[2];
-    double pgrp[6];
-    double pgrpdot[6];
-    double ax[0];
+    CrowdPassingPlanner planner;
+    LowpassFilter<6u> filter;
+    Hexapod_Robot::ROBOT robot;
+    double fxt[6];
+    double fxtFiltered[6];
+    double initialBodyPosition[6];
+    double legPositionList[18];
+    double jointLength[18];
+
+    robot.LoadXML("/usr/Robots/resource/HexapodIII/HexapodIII.xml");
+
     planner.Initialize();
-    planner.Start(0);
-    for (int step = 0; step < 10000; step++)
+    filter.SetCutFrequency(0.03, 1000);
+    filter.Initialize();
+
+    ClearDataArea(initialBodyPosition, 6);
+    ClearDataArea(jointLength, 6);
+    ClearDataArea(fxt, 6);
+
+    for (int step = 0; step < 20000; step++)
     {
         double timeNow = step*0.001;
-        ClearDataArea<double>(pgrp, 6);
-        ApplyForce(timeNow, fxt);
-        planner.DoIteration(timeNow, fxt, pgrp, pgrpdot);
-        for (int i = 0; i < 6; i++)
+        ClearDataArea<double>(legPositionList, 6);
+
+        if (step == 1200)
         {
-            trj << pgrp[i] << '\t';
+            planner.Start(timeNow);
         }
-        trj << endl;
+        ApplyForce(timeNow, fxt);
+        filter.DoFilter(fxt, fxtFiltered);
+
+        planner.DoIteration(timeNow, fxtFiltered, legPositionList);
+        robot.SetPee(legPositionList, initialBodyPosition, "G");
+        robot.GetPin(jointLength);
+        auto internalData = planner.GetInternalData();
+
+        if (step % 10 == 0){
+
+            trj << setw(10) << fixed << setprecision(5) << timeNow << "  ";
+            for (int i = 0; i < 18; i++)
+            {
+                trj << setw(10) << fixed << setprecision(5) << legPositionList[i] << "  ";
+            }
+
+            for (int i = 0; i < 18; i++)
+            {
+                trj << setw(10) << fixed << setprecision(5) << jointLength[i] << "  ";
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                trj << setw(10) << fixed << setprecision(5) << internalData.svRobotD[i] << "  ";
+            }
+            for (int i = 0; i < 16; i++)
+            {
+                trj << setw(10) << fixed << setprecision(5) << internalData.svLegD[i] << "  ";
+            }
+            trj << setw(10) << fixed << setprecision(5) << fxtFiltered[1] << "  ";
+            trj << setw(10) << fixed << setprecision(5) << fxtFiltered[5] << "  ";
+            
+            trj << endl;
+        }
+
     }
     trj.flush();
     trj.close();
@@ -47,12 +94,14 @@ void ClearDataArea( T* data, int length )
 
 void ApplyForce( double timeNow, double* fxt )
 {
-    if (timeNow > 3.6 && timeNow < 4.4)
+    if (timeNow > 3.6 && timeNow < 4)
     {
-        fxt[0] = 230;
+        fxt[1] = 60;
+        fxt[5] = 20;
     }
     else
     {
-        fxt[0] = 0;
+        fxt[1] = 0;
+        fxt[5] = 0;
     }
 }

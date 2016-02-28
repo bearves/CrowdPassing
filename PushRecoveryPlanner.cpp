@@ -36,8 +36,10 @@ int PushRecoveryPlanner::LoadData()
 
 int PushRecoveryPlanner::Initialize(int gaitMod)
 {
+    lpf.Initialize();
+    lpf.SetCutFrequency(0.03, 1000);
     if ( olgaitState == OGS_OFFLINE && gaitMod == 1){
-        virtualPlanner.Initialize();
+        crowdPassingPlanner.Initialize();
         olgaitState = OGS_ONLINE_DRAG;
     }
     else if ( olgaitState == OGS_OFFLINE && gaitMod == 2)
@@ -50,8 +52,9 @@ int PushRecoveryPlanner::Initialize(int gaitMod)
 
 int PushRecoveryPlanner::Start(double timeNow)
 {
-    if ( olgaitState == OGS_ONLINE_DRAG ){
-        virtualPlanner.Start(timeNow);
+    if ( olgaitState == OGS_ONLINE_DRAG )
+    {
+        crowdPassingPlanner.Start(timeNow);
     }
     else if (olgaitState == OGS_ONLINE_RETREAT)
     {
@@ -64,7 +67,7 @@ int PushRecoveryPlanner::Stop(double timeNow)
 {
     if ( olgaitState == OGS_ONLINE_DRAG )
     {
-        virtualPlanner.RequireStop(timeNow);
+        crowdPassingPlanner.RequireStop(timeNow);
     }
     else if ( olgaitState == OGS_ONLINE_RETREAT)
     {
@@ -94,21 +97,35 @@ int PushRecoveryPlanner::GetInitialJointLength(double jointLength[])
 int PushRecoveryPlanner::GenerateJointTrajectory(
         double timeNow,
         double externalForce[],
-        double jointLength[])
+        double jointLength[],
+        char*  controlDataForLog)
 {
     if ( olgaitState == OGS_OFFLINE)
         return -1; // This function should not be called when olgaitState == OGS_OFFLINE
     
     if ( olgaitState == OGS_ONLINE_DRAG)
     {
-        virtualPlanner.DoIteration(timeNow, externalForce, legGroupPosition, legGroupPositionDot);
-        this->CalculateEachLegPosition();
+        for(int i = 0; i < 6; i++)
+        {
+            rawForce[i] = externalForce[i];
+        }
+        lpf.DoFilter(rawForce, filteredForce);
 
-        //initialBodyPosition = { 0, 1/2, 0, 0, 0, 0};
-        //s_ep2pm(initialBodyPosition, pm, "321");
-        //s_pm2ep(pm, initialBodyPosition, "313");
+        // log the force for analysis
+        memcpy(controlDataForLog, (void *)rawForce, sizeof(rawForce)); 
+        memcpy(controlDataForLog + sizeof(rawForce), (void *)filteredForce, sizeof(filteredForce)); 
+        // Here for calibration, we set force to zero at first
+        for(int i = 0; i < 6; i++)
+        {
+            filteredForce[i] = 0; 
+        }
+
+        crowdPassingPlanner.DoIteration(timeNow, externalForce, feetPosition);
         robot.SetPee(feetPosition, initialBodyPosition, "G");
         robot.GetPin(jointLength);
+
+        auto internalData = crowdPassingPlanner.GetInternalData();
+        memcpy(controlDataForLog + sizeof(rawForce) + sizeof(filteredForce), &internalData, sizeof(CrowdPassingPlanner::InternalData));
     }
 
     else if (olgaitState == OGS_ONLINE_RETREAT)

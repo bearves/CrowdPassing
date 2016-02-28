@@ -2,8 +2,9 @@
 #define PUSH_RECOVERY_PLANNER_H
 
 #include "Hexapod_Robot.h"
-#include "VirtualBipedPlanner.h"
 #include "RetreatGait.h"
+#include "LowpassFilter.h"
+#include "CrowdPassingPlanner.h"
 
 // The planner to generate the joint trajectory for push recovery
 class PushRecoveryPlanner
@@ -31,7 +32,7 @@ public:
     int Offline();
 
     // Generate the joint trajectory due to the external force, should be called in each cycle.
-    int GenerateJointTrajectory(double timeNow, double externalForce[], double jointLengthList[]);
+    int GenerateJointTrajectory(double timeNow, double externalForce[], double jointLengthList[], char* controlDataForLog);
     // Get the joint length of initial position, used for go to initial position before starting
     int GetInitialJointLength(double jointLengthList[]);
     // Get the forward solution of the robot
@@ -44,8 +45,10 @@ private:
     static const double BASIC_BODY_POSITION[6];
 
     Hexapod_Robot::ROBOT robot;
-    VirtualBipedPlanner virtualPlanner;
+
     RetreatGait retreatGaitPlanner; 
+    CrowdPassingPlanner crowdPassingPlanner;
+    LowpassFilter<6> lpf;
 
     ONLINE_GAIT_STATE olgaitState;
 
@@ -55,6 +58,9 @@ private:
     double legGroupPositionDot[6];
     double feetPosition[18];
     double bodyPosition[18];
+
+    double rawForce[6];
+    double filteredForce[6];
 
     // Assign the position of leg group from the virtual model to the position of acutal legs
     int CalculateEachLegPosition();

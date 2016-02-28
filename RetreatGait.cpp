@@ -3,7 +3,7 @@
 using namespace std;
 
 const double RetreatGait::timeOfAction[] = 
-     { 0.02, 3.401, 3.401, 3.5, 5, 5, 5, 5};
+    { 0.02, 3.401, 3.401, 3.5, 5, 5, 5, 5};
 
 const double RetreatGait::timeInterval = 0.001;
 
@@ -63,7 +63,6 @@ int RetreatGait::LoadEachData(const char* dataPath, int dataLength, double (* da
 {
     std::fstream fin;
     double temp;
-    /* gait forward */
     fin.open(dataPath);
     if(fin.fail())
         return errno;
