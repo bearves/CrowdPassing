@@ -108,7 +108,12 @@ private:
 
     void MapLegPosToActual(double* legPositionList);
     void GetForceInGlobalCoordinate(double* fSensor, double* svRobot, double* fContact);
-    void GetVirtualForce(const double timeFromStart, double* svRobot, double* posTracking, double* fVirtualG);
+    void GetVirtualForce (
+            const double timeFromStart, 
+            double* svRobot, 
+            double* posTracking, 
+            double* fVirtualG, 
+            VIRTUAL_GAIT_STATE gaitState );
 
     void UpdateRobotBodyState(double* svRobot, double* fVirtualG, double* fContactG, double* posZMP);
     void EstimateNextFootholdCenter(

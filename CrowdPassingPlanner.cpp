@@ -93,7 +93,7 @@ int CrowdPassingPlanner::DoIteration(
         GetForceInGlobalCoordinate(fext, svRobot, fContactG);
 
         // Construct the virtual forces
-        GetVirtualForce(timeFromStart, svRobot, posTracking, fVirtualG);
+        GetVirtualForce(timeFromStart, svRobot, posTracking, fVirtualG, gaitState);
 
         // Solve virtual dynamics
         UpdateRobotBodyState(svRobot, fVirtualG, fContactG, posZMP);
@@ -107,6 +107,15 @@ int CrowdPassingPlanner::DoIteration(
             memcpy(lastsvFoothold, svFoothold, sizeof(svFoothold));
             memcpy(lastsvFootholdDir, svFootholdDir, sizeof(svFootholdDir));
             memcpy(lastHFoothold, HFoothold, sizeof(HFoothold));
+
+            if (gaitState == VGS_STOPPING)
+            {
+                stepLeft--;
+                if (stepLeft <= 0)
+                {
+                    gaitState = VGS_STOPPED;
+                }
+            }
         }
 
         // Estimate the next footholds of the swinging legs based on prediction
@@ -277,7 +286,11 @@ void CrowdPassingPlanner::UpdateRobotBodyState(
 }
     
 void CrowdPassingPlanner::GetVirtualForce(
-        const double timeFromStart, double* svRobot, double* posTracking, double* fVirtualG)
+        const double timeFromStart, 
+        double* svRobot, 
+        double* posTracking, 
+        double* fVirtualG,
+        VIRTUAL_GAIT_STATE gaitState)
 {
     double fTangent[2] = {forceSafe * cos(posTracking[2]), 
                           forceSafe * sin(posTracking[2])};
@@ -296,6 +309,11 @@ void CrowdPassingPlanner::GetVirtualForce(
     double normFCombine = sqrt(fCombine[0]*fCombine[0] + fCombine[1]*fCombine[1]);
     double fPush[2] = {forceSafe / normFCombine * fCombine[0],
                        forceSafe / normFCombine * fCombine[1]};
+    if (gaitState == VGS_STOPPING)
+    {
+        fPush[0] = 0;
+        fPush[1] = 0;
+    }
     double fDamp[2] = {-bVirtual * svRobot[3],
                        -bVirtual * svRobot[4]};
 
