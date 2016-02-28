@@ -19,6 +19,7 @@ int main(int argc, char** argv)
     }
 
     cout << "Opening log file:" << argv[1] << endl;
+    cout << "Data size:" << sizeof(data) << endl;
 
     ifstream fin(argv[1]);
     ofstream fout("ParsedFile.txt");
@@ -46,6 +47,7 @@ int main(int argc, char** argv)
             fout << data.commandData[i].Position << "  ";
         }
         fout << data.commandData[17].Position << endl;
+        
     }
 
     fin.close();

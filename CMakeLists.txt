@@ -79,5 +79,5 @@ target_link_libraries(ClientPRT ${ROBOTS_LINK_LIBS} ${ARIS_NORT_LINK_LIBS} ${LAP
 set(SOURCE_FILES ./LogDataReader.cpp)
 PREPEND(FULL_SRC PRT ${SOURCE_FILES})
 add_executable(LogDataReader ${SOURCE_FILES})
-target_link_libraries(LogDataReader ${ROBOTS_LINK_LIBS} ${ARIS_LINK_LIBS} ${LAPACK_LINK_LIBS} ${ETHERLAB_LINK_LIBS} ${XENOMAI_LINK_LIBS} ${SYSTEM_LINK_LIBS})
+target_link_libraries(LogDataReader ${ROBOTS_LINK_LIBS} ${ARIS_LINK_LIBS} ${LAPACK_LINK_LIBS}  ${SYSTEM_LINK_LIBS})
 
