@@ -35,8 +35,8 @@ void CrowdPassingPlanner::InitParams()
 {
     dt         = 0.001;
     mRobot     = 80;
-    IRobot     = 80;
-    forceSafe  = 70;
+    IRobot     = 200;
+    forceSafe  = 100;
     vMax       = 0.13;
     bVirtual   = forceSafe / vMax;
     l0         = 2.5;
