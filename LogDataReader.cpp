@@ -1,4 +1,5 @@
 #include "Aris_ControlData.h"
+#include "CrowdPassingPlanner.h"
 #include <fstream>
 #include <iostream>
 #include <errno.h>
@@ -7,9 +8,17 @@
 using namespace std;
 using namespace Aris::RT_CONTROL;
 
+struct ControllerData
+{
+    double forceRaw[6];
+    double forceFiltered[6];
+    CrowdPassingPlanner::InternalData internalData;
+};
+
 int main(int argc, char** argv)
 {
     CMachineData data;
+    ControllerData controllerData;
 
     if (argc < 2)
     {
@@ -31,6 +40,7 @@ int main(int argc, char** argv)
     }
     while( fin.read((char *)&data, sizeof(data)))
     {
+        memcpy(&controllerData, data.controlData, sizeof(controllerData));
         fout << data.time << "  ";
         for(int i = 0; i < 6; i++)
         {
@@ -42,11 +52,30 @@ int main(int argc, char** argv)
             fout << data.feedbackData[i].Position << "  ";
         }
 
-        for(int i = 0; i < 17; i++)
+        for(int i = 0; i < 18; i++)
         {
             fout << data.commandData[i].Position << "  ";
         }
-        fout << data.commandData[17].Position << endl;
+
+        for(int i = 0; i < 6; i++)
+        {
+            fout << controllerData.forceRaw[i] << "  ";
+        }
+        for(int i = 0; i < 6; i++)
+        {
+            fout << controllerData.forceFiltered[i] << "  ";
+        }
+
+        for(int i = 0; i < 6; i++)
+        {
+            fout << controllerData.internalData.svRobotD[i] << "  ";
+        }
+
+        for (int i = 0; i < 17; ++i) 
+        {
+            fout << controllerData.internalData.svLegD[i] << "  ";
+        }
+        fout << controllerData.internalData.svLegD[17] << endl;
         
     }
 
