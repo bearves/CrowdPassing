@@ -10,7 +10,7 @@ const double CrowdPassingPlanner::rLegs[2][6]=
 const int CrowdPassingPlanner::LEG_MAP[6] = 
     {0, 1, 2, 5, 4, 3};
 
-const double CrowdPassingPlanner::DISTANCE_COM_TO_FSR = 0.35;
+const double CrowdPassingPlanner::DISTANCE_COM_TO_FSR = 1.0;
 
 CrowdPassingPlanner::CrowdPassingPlanner()
 {}
@@ -34,9 +34,9 @@ int CrowdPassingPlanner::Initialize()
 void CrowdPassingPlanner::InitParams()
 {
     dt         = 0.001;
-    mRobot     = 80;
+    mRobot     = 60;
     IRobot     = 100;
-    forceSafe  = 70;
+    forceSafe  = 40;
     vMax       = 0.11;
     bVirtual   = forceSafe / vMax;
     l0         = 2.5;
