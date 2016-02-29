@@ -505,10 +505,10 @@ int tg(Aris::RT_CONTROL::CMachineData& machineData,
     givenForce[5] = 1 * machineData.forceData[0].forceValues[5] / 1000.0;
 
     // saturation
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < 6; i++)
     {
         //givenForce[i] = forceForTest[forceSelectionFlag * 3 + i];
-        if (fabs(givenForce[i]) < 10.0)
+        if (fabs(givenForce[i]) < 2.0)
             givenForce[i] = 0;
         if (givenForce[i] > 180.0)
             givenForce[i] = 180.0;

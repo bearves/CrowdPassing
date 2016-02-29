@@ -120,7 +120,7 @@ int PushRecoveryPlanner::GenerateJointTrajectory(
             //filteredForce[i] = 0; 
         //}
 
-        crowdPassingPlanner.DoIteration(timeNow, externalForce, feetPosition);
+        crowdPassingPlanner.DoIteration(timeNow, filteredForce, feetPosition);
         robot.SetPee(feetPosition, initialBodyPosition, "G");
         robot.GetPin(jointLength);
 

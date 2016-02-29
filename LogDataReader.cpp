@@ -71,6 +71,11 @@ int main(int argc, char** argv)
             fout << controllerData.internalData.svRobotD[i] << "  ";
         }
 
+        for(int i = 0; i < 3; i++)
+        {
+            fout << controllerData.internalData.fContactGD[i] << "  ";
+        }
+
         for (int i = 0; i < 17; ++i) 
         {
             fout << controllerData.internalData.svLegD[i] << "  ";
